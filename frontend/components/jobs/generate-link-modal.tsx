@@ -50,7 +50,7 @@ export const GenerateLinkModal = ({ isOpen, onClose, preselectedJob, preselected
 
   const handleGenerate = () => {
     const mockToken = Math.random().toString(36).substring(7);
-    const url = `https://interview.talentai.app/s/${selectedJobId || 'j_gen'}/${selectedClientId || 'c_gen'}?token=${mockToken}`;
+    const url = `https://interview.engval.ai/s/${selectedJobId || 'j_gen'}/${selectedClientId || 'c_gen'}?token=${mockToken}`;
     setGeneratedLink(url);
   };
 
