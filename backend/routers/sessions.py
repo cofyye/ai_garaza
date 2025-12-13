@@ -6,6 +6,7 @@ from datetime import datetime
 
 from dependencies.database import get_db
 from schemas.assignment import AssignmentInDB, AssignmentStatus
+from schemas.application import ApplicationUpdate, ApplicationStatus
 from services.assignment_service import AssignmentService
 from services.application_service import ApplicationService
 
@@ -77,7 +78,7 @@ async def complete_session(
     # Update application status to completed
     await application_service.update_application(
         application_id=assignment.application_id,
-        update={"status": "completed"}
+        update=ApplicationUpdate(status=ApplicationStatus.COMPLETED)
     )
     
     return {

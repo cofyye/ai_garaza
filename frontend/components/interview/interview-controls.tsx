@@ -46,7 +46,7 @@ export const InterviewControls: React.FC<InterviewControlsProps> = ({
 
       <button
         onClick={onEndInterview}
-        className="h-12 px-6 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center gap-2 font-medium transition-colors shadow-sm shadow-red-200"
+        className="h-12 px-6 rounded-full bg-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white flex items-center gap-2 font-medium transition-colors shadow-sm shadow-red-200"
       >
         <PhoneOff className="h-4 w-4" />
         <span>End</span>

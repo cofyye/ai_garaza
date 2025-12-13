@@ -345,10 +345,13 @@ class AssignmentService:
             print(f"   - {criteria}")
         if assignment.get('additional_resources'):
             print(f"\n📚 Resources: {assignment.get('additional_resources')}")
-        print(f"\n🔗 Submission Link: http://localhost:8000/api/assignments/{assignment_id}/submit")
+        
+        # Use session_url if available, otherwise fall back to assignment ID
+        interview_link = assignment.get('session_url', f"http://localhost:3000/#/interview/{assignment.get('session_id', assignment_id)}")
+        print(f"\n🔗 Interview Link: {interview_link}")
         print(f"\nGood luck!")
         print(f"\nBest regards,")
-        print(f"{job.get('company')} Team")
+        print(f"Engval.ai Team")
         print("="*80 + "\n")
         
         return True

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { InterviewHeader } from "../components/interview/interview-header";
 import { AIParticipant } from "../components/interview/ai-participant";
 import { UserParticipant } from "../components/interview/user-participant";
@@ -11,48 +12,56 @@ import { useSpeechRecognition } from "../hooks/use-speech-recognition";
 import { useVideoStream } from "../hooks/use-video-stream";
 import { useCodeExecution } from "../hooks/use-code-execution";
 import { useAudioVisualizer } from "../hooks/use-audio-visualizer";
+import { getSession, completeSession } from "../lib/api.service";
+import type { Assignment } from "../lib/types";
 
 export const InterviewRoomPage = () => {
+  const { sessionId } = useParams();
+  const navigate = useNavigate();
   const [selectedLanguage, setSelectedLanguage] = useState("python");
   const [isTaskOpen, setIsTaskOpen] = useState(false);
-  const [code, setCode] = useState(`def solve_problem(arr, target):
-    """
-    Implement a function that finds the two numbers 
-    in the array that add up to the target.
-    """
-    seen = {}
-    for i, num in enumerate(arr):
-        complement = target - num
-        if complement in seen:
-            return [seen[complement], i]
-        seen[num] = i
-    return []
+  const [code, setCode] = useState("");
+  const [assignment, setAssignment] = useState<Assignment | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCompleting, setIsCompleting] = useState(false);
 
-# Test case
-result = solve_problem([2, 7, 11, 15], 9)
-print(f"Result: {result}")`);
+  // Fetch assignment data
+  useEffect(() => {
+    const fetchAssignment = async () => {
+      if (!sessionId) return;
 
-  const taskDescription = `Two Sum Problem:
+      try {
+        const data = await getSession(sessionId);
+        setAssignment(data);
+      } catch (error) {
+        console.error("Failed to load assignment:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
+    fetchAssignment();
+  }, [sessionId]);
 
-You may assume that each input would have exactly one solution, and you may not use the same element twice.
+  // Build task description from assignment
+  const taskDescription = assignment
+    ? `${assignment.task_title}
 
-You can return the answer in any order.
+${assignment.task_description}
 
-Example 1:
-Input: nums = [2,7,11,15], target = 9
-Output: [0,1]
-Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].
+REQUIREMENTS:
+${assignment.task_requirements.map((req, i) => `${i + 1}. ${req}`).join("\n")}
 
-Example 2:
-Input: nums = [3,2,4], target = 6
-Output: [1,2]
-
-Example 3:
-Input: nums = [3,3], target = 6
-Output: [0,1]
-`;
+EVALUATION CRITERIA:
+${assignment.evaluation_criteria
+  .map((crit, i) => `${i + 1}. ${crit}`)
+  .join("\n")}
+${
+  assignment.additional_resources
+    ? `\n\nADDITIONAL RESOURCES:\n${assignment.additional_resources}`
+    : ""
+}`
+    : "Loading task...";
 
   // Custom hooks
   const { isListening, isMuted, toggleMic } = useSpeechRecognition();
@@ -65,10 +74,40 @@ Output: [0,1]
     runCode(code, selectedLanguage);
   };
 
-  const handleEndInterview = () => {
-    console.log("� Ending interview...");
-    // TODO: Navigate away or show confirmation
+  const handleEndInterview = async () => {
+    if (!sessionId) return;
+
+    if (!confirm("Da li želite da završite intervju?")) return;
+
+    setIsCompleting(true);
+
+    try {
+      await completeSession(sessionId);
+      alert("Intervju je uspešno završen! Hvala vam na učešću.");
+      navigate("/applications");
+    } catch (error) {
+      console.error("Failed to complete interview:", error);
+      alert("Greška prilikom završavanja intervjua. Molimo pokušajte ponovo.");
+    } finally {
+      setIsCompleting(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-gray-600">Učitavanje...</div>
+      </div>
+    );
+  }
+
+  if (!assignment) {
+    return (
+      <div className="h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-red-600">Nije moguće učitati zadatak.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col overflow-hidden font-sans text-gray-900 relative">

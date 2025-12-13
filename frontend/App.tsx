@@ -8,7 +8,6 @@ import { JobDetailPage } from "./pages/job-detail-page";
 import { ClientDetailPage } from "./pages/client-detail-page";
 import { AnalyticsPage } from "./pages/analytics-page";
 import { InterviewRoomPage } from "./pages/interview-room-page";
-import { InterviewSessionPage } from "./pages/interview-session-page";
 
 const DashboardLayout = () => {
   return (
@@ -30,37 +29,20 @@ export default function App() {
   return (
     <HashRouter>
       <Routes>
-        {/* Interview session page without layout */}
-        <Route
-          path="/interview/:sessionId"
-          element={<InterviewSessionPage />}
-        />
+        {/* Interview room page without layout */}
+        <Route path="/interview/:sessionId" element={<InterviewRoomPage />} />
 
         {/* Main app routes with layout */}
-        <Route
-          path="*"
-          element={
-                  <Routes>
-              {/* Dashboard Routes (with Sidebar/Topbar) */}
         <Route element={<DashboardLayout />}>
           <Route path="/" element={<Navigate to="/jobs" replace />} />
-                <Route path="/applications" element={<ApplicationsPage />} />
-                <Route path="/jobs" element={<JobsPage />} />
-                <Route path="/jobs/:id" element={<JobDetailPage />} />
-                <Route
-                  path="/applications/:id"
-                  element={<ClientDetailPage />}
-                />
-                <Route path="/analytics" element={<AnalyticsPage />} />
-              </Route>
+          <Route path="/applications" element={<ApplicationsPage />} />
+          <Route path="/jobs" element={<JobsPage />} />
+          <Route path="/jobs/:id" element={<JobDetailPage />} />
+          <Route path="/applications/:id" element={<ClientDetailPage />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
+        </Route>
 
-        {/* Standalone Routes (Full Screen) */}
-        <Route path="/interview-room" element={<InterviewRoomPage />} />
-        
         <Route path="*" element={<Navigate to="/jobs" replace />} />
-            </Routes>
-                }
-        />
       </Routes>
     </HashRouter>
   );

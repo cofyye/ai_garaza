@@ -47,9 +47,28 @@ async def execute_code(request: CodeExecutionRequest):
             temp_file = f.name
         
         try:
+            # Try to find Python executable (try python3 first, then python)
+            python_cmd = None
+            for cmd in ['python3', 'python']:
+                try:
+                    subprocess.run(
+                        [cmd, '--version'],
+                        capture_output=True,
+                        timeout=1
+                    )
+                    python_cmd = cmd
+                    break
+                except (FileNotFoundError, subprocess.TimeoutExpired):
+                    continue
+            
+            if not python_cmd:
+                return CodeExecutionResponse(
+                    error="Python interpreter not found. Please ensure Python is installed."
+                )
+            
             # Execute the Python code with a timeout
             result = subprocess.run(
-                ['python', temp_file],
+                [python_cmd, temp_file],
                 capture_output=True,
                 text=True,
                 timeout=10,  # 10 second timeout
