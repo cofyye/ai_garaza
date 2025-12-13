@@ -25,6 +25,7 @@ import {
   Loader2,
   CheckCircle,
   Calendar,
+  Sparkles,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatDistanceToNow, format } from "date-fns";
@@ -38,6 +39,7 @@ export const ClientDetailPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [customRequirements, setCustomRequirements] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -161,101 +163,116 @@ export const ClientDetailPage = () => {
         <div className="lg:col-span-2 flex flex-col">
           {/* Technical Assignment Card */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 h-full">
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6">
-              Technical Assignment
-            </h3>
-
             {assignment ? (
-              <div className="space-y-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h4 className="font-semibold text-gray-900 text-lg">
-                      {assignment.task_title}
-                    </h4>
-                    <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
-                      <span className="font-medium">Difficulty:</span>
-                      <span className="capitalize px-2 py-0.5 bg-gray-100 rounded text-xs">
-                        {assignment.difficulty}
+              <>
+                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6">
+                  Technical Assignment
+                </h3>
+                <div className="space-y-6">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="font-semibold text-gray-900 text-lg">
+                        {assignment.task_title}
+                      </h4>
+                      <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
+                        <span className="font-medium">Difficulty:</span>
+                        <span className="capitalize px-2 py-0.5 bg-gray-100 rounded text-xs">
+                          {assignment.difficulty}
+                        </span>
+                      </p>
+                    </div>
+                    <Badge
+                      className={
+                        assignment.status === "sent"
+                          ? "bg-gray-100 text-gray-800 border-gray-200"
+                          : assignment.status === "submitted"
+                          ? "bg-gray-100 text-gray-800 border-gray-200"
+                          : "bg-gray-100 text-gray-800 border-gray-200"
+                      }
+                    >
+                      {assignment.status}
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                      <Clock className="h-4 w-4 text-gray-500" />
+                      <span>{assignment.time_limit_hours}h time limit</span>
+                    </div>
+                    {assignment.deadline && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                        <Calendar className="h-4 w-4 text-gray-500" />
+                        <span>
+                          Due{" "}
+                          {format(
+                            new Date(assignment.deadline),
+                            "MMM d, HH:mm"
+                          )}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                      <CheckCircle className="h-4 w-4 text-gray-500" />
+                      <span>{assignment.email_sent_count} email(s) sent</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-gray-100">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                      Key Requirements
+                    </p>
+                    <ul className="space-y-2">
+                      {assignment.task_requirements
+                        .slice(0, 3)
+                        .map((req, idx) => (
+                          <li
+                            key={idx}
+                            className="flex items-start gap-2 text-sm text-gray-700"
+                          >
+                            <div className="h-1.5 w-1.5 rounded-full bg-black mt-2 shrink-0" />
+                            <span>{req}</span>
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col h-full">
+                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">
+                  Generate Assessment
+                </h3>
+
+                <div className="flex-1 flex flex-col">
+                  <textarea
+                    value={customRequirements}
+                    onChange={(e) => setCustomRequirements(e.target.value)}
+                    placeholder="Enter specific requirements or focus areas for the AI..."
+                    className="flex-1 w-full p-4 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 focus:ring-0 resize-none bg-gray-50 mb-6 placeholder:text-gray-400"
+                  />
+                  <div className="flex items-center justify-between mt-auto">
+                    <p className="text-xs text-gray-500">
+                      Will generate a task for{" "}
+                      <span className="font-medium">
+                        {application.job_title}
                       </span>
                     </p>
-                  </div>
-                  <Badge
-                    className={
-                      assignment.status === "sent"
-                        ? "bg-gray-100 text-gray-800 border-gray-200"
-                        : assignment.status === "submitted"
-                        ? "bg-gray-100 text-gray-800 border-gray-200"
-                        : "bg-gray-100 text-gray-800 border-gray-200"
-                    }
-                  >
-                    {assignment.status}
-                  </Badge>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                    <Clock className="h-4 w-4 text-gray-500" />
-                    <span>{assignment.time_limit_hours}h time limit</span>
-                  </div>
-                  {assignment.deadline && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                      <Calendar className="h-4 w-4 text-gray-500" />
-                      <span>
-                        Due{" "}
-                        {format(new Date(assignment.deadline), "MMM d, HH:mm")}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                    <CheckCircle className="h-4 w-4 text-gray-500" />
-                    <span>{assignment.email_sent_count} email(s) sent</span>
+                    <Button
+                      onClick={handleGenerateAssignment}
+                      disabled={isGenerating}
+                      className="bg-black text-white hover:bg-gray-800 px-6 h-10"
+                    >
+                      {isGenerating ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        "Generate & Send"
+                      )}
+                    </Button>
                   </div>
                 </div>
-
-                <div className="pt-4 border-t border-gray-100">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                    Key Requirements
-                  </p>
-                  <ul className="space-y-2">
-                    {assignment.task_requirements
-                      .slice(0, 3)
-                      .map((req, idx) => (
-                        <li
-                          key={idx}
-                          className="flex items-start gap-2 text-sm text-gray-700"
-                        >
-                          <div className="h-1.5 w-1.5 rounded-full bg-black mt-2 shrink-0" />
-                          <span>{req}</span>
-                        </li>
-                      ))}
-                  </ul>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                <div className="bg-white p-3 rounded-full w-fit mx-auto mb-4 shadow-sm border border-gray-100">
-                  <Send className="h-6 w-6 text-gray-400" />
-                </div>
-                <h4 className="text-sm font-medium text-gray-900 mb-1">
-                  No Assignment Sent
-                </h4>
-                <p className="text-sm text-gray-500 mb-6">
-                  Generate a technical task for this candidate.
-                </p>
-                <Button
-                  onClick={handleGenerateAssignment}
-                  disabled={isGenerating}
-                  className="gap-2 shadow-lg shadow-blue-500/20"
-                >
-                  {isGenerating ? (
-                    <>
-                      <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>Generate & Send Assignment</>
-                  )}
-                </Button>
               </div>
             )}
           </div>
