@@ -11,11 +11,15 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", ...props }, ref) => {
     const variants = {
-      primary: "bg-black text-white hover:bg-gray-800 shadow-sm",
-      secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200",
-      outline: "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50",
-      ghost: "bg-transparent text-gray-600 hover:bg-gray-100",
-      danger: "bg-red-600 text-white hover:bg-red-700",
+      primary:
+        "bg-black text-white hover:bg-gray-800 shadow-sm border border-transparent",
+      secondary:
+        "bg-white text-gray-900 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 shadow-sm",
+      outline:
+        "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900",
+      ghost:
+        "bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+      danger: "bg-red-600 text-white hover:bg-red-700 shadow-sm",
     };
     const sizes = {
       sm: "h-8 px-3 text-xs",
@@ -27,7 +31,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "inline-flex items-center justify-center rounded-md font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black",
+          "inline-flex items-center justify-center rounded-full font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none focus:outline-none",
           variants[variant],
           sizes[size],
           className
@@ -40,29 +44,44 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = "Button";
 
 // BADGE
-export const Badge = ({ className, children, variant = "default" }: { className?: string, children?: React.ReactNode, variant?: "default" | "outline" }) => {
+export const Badge = ({
+  className,
+  children,
+  variant = "default",
+}: {
+  className?: string;
+  children?: React.ReactNode;
+  variant?: "default" | "outline";
+}) => {
   return (
-    <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors", variant === "default" ? "border-transparent" : "border", className)}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors",
+        variant === "default" ? "border-transparent" : "border",
+        className
+      )}
+    >
       {children}
     </span>
   );
 };
 
 // INPUT
-export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
-  ({ className, ...props }, ref) => {
-    return (
-      <input
-        ref={ref}
-        className={cn(
-          "flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50",
-          className
-        )}
-        {...props}
-      />
-    );
-  }
-);
+export const Input = React.forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement>
+>(({ className, ...props }, ref) => {
+  return (
+    <input
+      ref={ref}
+      className={cn(
+        "flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400 transition-all disabled:cursor-not-allowed disabled:opacity-50",
+        className
+      )}
+      {...props}
+    />
+  );
+});
 Input.displayName = "Input";
 
 // DRAWER (Simplified Sheet)
@@ -88,12 +107,15 @@ export const Drawer = ({ isOpen, onClose, children, title }: DrawerProps) => {
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-xl sm:max-w-lg flex flex-col"
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-2xl sm:max-w-lg flex flex-col border-l border-gray-100"
           >
             <div className="flex items-center justify-between border-b px-6 py-4">
               <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-              <button onClick={onClose} className="rounded-md p-2 text-gray-500 hover:bg-gray-100">
+              <button
+                onClick={onClose}
+                className="rounded-md p-2 text-gray-500 hover:bg-gray-100"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -131,7 +153,9 @@ export const Modal = ({ isOpen, onClose, children, title }: ModalProps) => {
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl"
             >
-              {title && <div className="border-b px-6 py-4 font-semibold">{title}</div>}
+              {title && (
+                <div className="border-b px-6 py-4 font-semibold">{title}</div>
+              )}
               <div className="p-6">{children}</div>
             </motion.div>
           </motion.div>

@@ -10,12 +10,14 @@ import { AnalyticsPage } from './pages/analytics-page';
 
 const AppLayout = ({ children }: { children?: React.ReactNode }) => {
   return (
-    <div className="flex min-h-screen w-full bg-[#F9FAFB]">
+    <div className="flex min-h-screen w-full bg-gray-100">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar />
-        <main className="flex-1 overflow-y-auto">
-          {children}
+        <main className="flex-1 overflow-y-auto p-6 pt-0">
+          <div className="min-h-full w-full rounded-3xl bg-white shadow-sm p-6">
+            {children}
+          </div>
         </main>
       </div>
     </div>

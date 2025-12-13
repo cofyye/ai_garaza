@@ -48,7 +48,7 @@ export const ClientDrawer = ({ client, onClose }: ClientDrawerProps) => {
 
           {client.status === "IN_PROGRESS" && (
             <div className="flex flex-col gap-2">
-               <div className="flex items-center gap-2 text-sm text-blue-600">
+               <div className="flex items-center gap-2 text-sm text-black">
                  <Clock className="h-4 w-4" />
                  <span>Interview in progress</span>
                </div>
@@ -100,7 +100,7 @@ export const ClientDrawer = ({ client, onClose }: ClientDrawerProps) => {
                <div className="flex items-center justify-between text-sm">
                  <span>Technical Knowledge</span>
                  <div className="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
-                   <div className="h-full bg-indigo-500 w-[90%]"></div>
+                   <div className="h-full bg-black w-[90%]"></div>
                  </div>
                </div>
             </div>

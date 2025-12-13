@@ -24,13 +24,13 @@ export const Sidebar = () => {
   const location = useLocation();
 
   return (
-    <aside className="hidden w-64 flex-col border-r border-gray-200 bg-white md:flex h-screen sticky top-0">
-      <div className="flex h-14 items-center border-b border-gray-200 px-6">
-        <Cpu className="mr-2 h-6 w-6 text-indigo-600" />
-        <span className="text-lg font-bold text-gray-900">TalentAI</span>
+    <aside className="hidden w-64 flex-col bg-transparent md:flex h-screen sticky top-0">
+      <div className="flex h-20 items-center px-6">
+        <Cpu className="mr-2 h-8 w-8 text-black" />
+        <span className="text-xl font-bold text-black">TalentAI</span>
       </div>
 
-      <nav className="flex-1 space-y-1 p-4">
+      <nav className="flex-1 space-y-2 px-4 mt-10">
         {NAV_ITEMS.map((item) => {
           const isActive = location.pathname.startsWith(item.path);
           return (
@@ -38,18 +38,18 @@ export const Sidebar = () => {
               key={item.label}
               to={item.disabled ? "#" : item.path}
               className={cn(
-                "group flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "group flex items-center rounded-xl px-4 py-3 text-sm font-medium transition-all",
                 isActive
-                  ? "bg-gray-100 text-gray-900"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
-                item.disabled && "cursor-not-allowed opacity-50 hover:bg-transparent"
+                  ? "bg-black text-white shadow-lg shadow-gray-200"
+                  : "text-gray-500 hover:bg-white hover:text-black hover:shadow-sm",
+                item.disabled && "cursor-not-allowed opacity-50 hover:bg-transparent hover:shadow-none"
               )}
               onClick={(e) => item.path === "#" && e.preventDefault()}
             >
               <item.icon
                 className={cn(
                   "mr-3 h-5 w-5 flex-shrink-0 transition-colors",
-                  isActive ? "text-gray-900" : "text-gray-400 group-hover:text-gray-500"
+                  isActive ? "text-white" : "text-gray-400 group-hover:text-black"
                 )}
               />
               {item.label}
@@ -58,10 +58,10 @@ export const Sidebar = () => {
         })}
       </nav>
 
-      <div className="border-t border-gray-200 p-4">
+      <div className="p-4">
         <Link
           to="#"
-          className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+          className="flex items-center rounded-xl px-4 py-3 text-sm font-medium text-gray-500 hover:bg-white hover:text-black hover:shadow-sm transition-all"
         >
           <HelpCircle className="mr-3 h-5 w-5 text-gray-400" />
           Help & Support

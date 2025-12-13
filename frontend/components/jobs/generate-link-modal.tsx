@@ -52,7 +52,7 @@ export const GenerateLinkModal = ({ isOpen, onClose, preselectedJob, preselected
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">Select Candidate</label>
             <select 
-              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400 transition-all"
               value={selectedClientId}
               onChange={(e) => setSelectedClientId(e.target.value)}
             >
@@ -64,12 +64,12 @@ export const GenerateLinkModal = ({ isOpen, onClose, preselectedJob, preselected
 
         {/* Selected Client Email Display */}
         {(selectedClientData || preselectedClient) && (
-            <div className="rounded-md bg-blue-50 p-3 flex items-center gap-3 border border-blue-100">
-                <div className="bg-white p-1.5 rounded-full text-blue-600">
+            <div className="rounded-md bg-gray-50 p-3 flex items-center gap-3 border border-gray-200">
+                <div className="bg-white p-1.5 rounded-full text-gray-900">
                     <Mail className="h-4 w-4" />
                 </div>
                 <div>
-                    <div className="text-xs text-blue-600 font-medium uppercase tracking-wide">Candidate Email</div>
+                    <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">Candidate Email</div>
                     <div className="text-sm font-medium text-gray-900">{selectedClientData?.email || preselectedClient?.email}</div>
                 </div>
             </div>
@@ -99,7 +99,7 @@ export const GenerateLinkModal = ({ isOpen, onClose, preselectedJob, preselected
             {/* Email Section */}
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
               <h4 className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-4">
-                <Send className="h-4 w-4 text-indigo-600" /> Send Invitation via Gmail
+                <Send className="h-4 w-4 text-gray-900" /> Send Invitation via Gmail
               </h4>
               
               <div className="space-y-3">
@@ -119,7 +119,7 @@ export const GenerateLinkModal = ({ isOpen, onClose, preselectedJob, preselected
                  <div className="flex justify-end gap-2 pt-2">
                     <Button variant="ghost" onClick={onClose} size="sm">Cancel</Button>
                     <Button 
-                        className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white" 
+                        className="gap-2 bg-black hover:bg-gray-800 text-white" 
                         onClick={() => {
                             alert(`Email sent to ${selectedClientData?.email || 'candidate'}!`);
                             onClose();

@@ -110,9 +110,9 @@ export const ClientDetailPage = () => {
     <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="p-6 max-w-7xl mx-auto"
+        className="max-w-7xl mx-auto"
     >
-      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4 pl-0 hover:bg-transparent hover:text-indigo-600">
+      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4 pl-0 hover:bg-transparent hover:text-gray-900">
         <ArrowLeft className="h-4 w-4 mr-2" /> Back to Clients
       </Button>
 
@@ -120,7 +120,7 @@ export const ClientDetailPage = () => {
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
           <div className="flex items-center gap-6">
-            <div className="h-20 w-20 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-3xl font-bold border-4 border-white shadow-sm">
+            <div className="h-20 w-20 rounded-full bg-gray-50 text-gray-900 flex items-center justify-center text-3xl font-bold border-4 border-white shadow-sm">
               {getInitials(client.name)}
             </div>
             <div>
@@ -175,8 +175,8 @@ export const ClientDetailPage = () => {
                           <div key={step.id} className="relative flex gap-4">
                               {/* Icon Marker */}
                               <div className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-300
-                                  ${isCompleted ? "border-indigo-600 bg-indigo-600 text-white" : 
-                                    isCurrent ? "border-indigo-600 bg-white text-indigo-600 ring-4 ring-indigo-50" : 
+                                  ${isCompleted ? "border-gray-900 bg-gray-900 text-white" : 
+                                    isCurrent ? "border-gray-900 bg-white text-gray-900 ring-4 ring-gray-100" : 
                                     "border-gray-200 bg-white text-gray-300"}`}
                               >
                                   <step.icon className="h-5 w-5" />
@@ -210,7 +210,7 @@ export const ClientDetailPage = () => {
                   
                   <div className="space-y-5">
                      {[
-                        { label: "Technical Proficiency", score: 88, color: "bg-blue-600" },
+                        { label: "Technical Proficiency", score: 88, color: "bg-black" },
                         { label: "Communication", score: 92, color: "bg-green-500" },
                         { label: "Problem Solving", score: 75, color: "bg-orange-500" },
                         { label: "System Design", score: 60, color: "bg-red-500" },
@@ -264,7 +264,7 @@ export const ClientDetailPage = () => {
                   <div className="space-y-4">
                      <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
                         <div className="flex justify-between items-center mb-2">
-                            <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">QUESTION 1</span>
+                            <span className="text-xs font-bold text-gray-900 bg-gray-200 px-2 py-1 rounded">QUESTION 1</span>
                             <span className="text-xs font-medium text-gray-400">04:20</span>
                         </div>
                         <p className="font-semibold text-gray-900 mb-1">"How would you handle state management in a large scale application?"</p>
@@ -292,7 +292,7 @@ export const ClientDetailPage = () => {
                         <motion.div 
                             initial={{ width: 0 }}
                             animate={{ width: `${progressPercentage}%` }}
-                            className="h-full bg-gradient-to-r from-blue-500 to-indigo-600"
+                            className="h-full bg-gray-900"
                         />
                     </div>
                     <div className="flex justify-between text-xs font-medium text-gray-400 uppercase tracking-wide">
@@ -306,7 +306,7 @@ export const ClientDetailPage = () => {
                 <div className="grid sm:grid-cols-2 gap-4">
                     <div className="rounded-lg border border-gray-100 bg-gray-50 p-5">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-white rounded-md shadow-sm text-indigo-600">
+                            <div className="p-2 bg-white rounded-md shadow-sm text-gray-900">
                                 <Clock className="h-5 w-5" />
                             </div>
                             <span className="font-semibold text-gray-900">Time Elapsed</span>
@@ -317,7 +317,7 @@ export const ClientDetailPage = () => {
 
                     <div className="rounded-lg border border-gray-100 bg-gray-50 p-5">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-white rounded-md shadow-sm text-indigo-600">
+                            <div className="p-2 bg-white rounded-md shadow-sm text-gray-900">
                                 <Send className="h-5 w-5" />
                             </div>
                             <span className="font-semibold text-gray-900">Last Action</span>
@@ -329,7 +329,7 @@ export const ClientDetailPage = () => {
 
                 <div className="mt-8 pt-8 border-t border-gray-100 flex justify-end gap-3">
                     <Button variant="outline">Preview Interview</Button>
-                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2">
+                    <Button className="bg-black hover:bg-gray-800 text-white gap-2">
                         <Mail className="h-4 w-4" /> Resend Invitation
                     </Button>
                 </div>

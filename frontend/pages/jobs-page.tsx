@@ -22,7 +22,8 @@ export const JobsPage = () => {
   // Fetch jobs from API
   useEffect(() => {
     const fetchJobs = async () => {
-      setIsLoading(true);
+      // Only show full loading state on initial load
+      if (jobs.length === 0) setIsLoading(true);
       setError(null);
       try {
         const statusFilter = filters.status !== "ALL" ? filters.status as JobStatus : undefined;
@@ -72,7 +73,7 @@ export const JobsPage = () => {
   }
 
   return (
-    <div className="p-6">
+    <div>
       <PageHeader title="Job Posts" subtitle="Manage open positions and requirements">
         <Button className="gap-2" onClick={() => alert("Stub: Create Job Modal")}>
           <Plus className="h-4 w-4" /> Create Job Post

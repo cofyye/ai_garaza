@@ -76,7 +76,7 @@ export const ClientsTable = ({ clients, onSelectClient }: ClientsTableProps) => 
                 </td>
                 <td className="px-6 py-4 text-right">
                   <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onSelectClient(client); }}>
-                    <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-indigo-600 transition-colors duration-200" />
+                    <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-black transition-colors duration-200" />
                   </Button>
                 </td>
               </motion.tr>

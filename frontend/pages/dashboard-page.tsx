@@ -5,7 +5,7 @@ import { EmptyState } from "../components/common/empty-state";
 
 export const DashboardPage = () => {
   return (
-    <div className="p-6">
+    <div>
       <PageHeader title="Overview" subtitle="Welcome back, admin." />
       
       <KpiRow>
@@ -17,10 +17,12 @@ export const DashboardPage = () => {
 
       <div className="mt-8">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-        <EmptyState 
-           title="No recent activity" 
-           description="Your activity feed will populate once candidates start taking interviews." 
-        />
+        <div className="rounded-xl border border-gray-200 bg-white p-1">
+          <EmptyState 
+             title="No recent activity" 
+             description="Your activity feed will populate once candidates start taking interviews." 
+          />
+        </div>
       </div>
     </div>
   );

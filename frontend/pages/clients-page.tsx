@@ -24,7 +24,7 @@ export const ClientsPage = () => {
   const positions = useMemo(() => getUniquePositions(MOCK_CLIENTS), []);
 
   return (
-    <div className="p-6">
+    <div>
       <PageHeader title="Clients" subtitle="Manage candidates and interview statuses">
         <Button variant="outline" className="gap-2">
           <Download className="h-4 w-4" /> Export

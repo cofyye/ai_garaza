@@ -39,7 +39,7 @@ export const AnalyticsPage = () => {
   const maxDistVal = Math.max(...Object.values(scoreDist), 1);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <PageHeader title="Analytics" subtitle="Insights into interview performance and hiring decisions">
         <select 
             className="h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-black min-w-[250px]"
@@ -77,7 +77,7 @@ export const AnalyticsPage = () => {
                                 initial={{ width: 0 }}
                                 animate={{ width: `${(count / maxDistVal) * 100}%` }}
                                 transition={{ duration: 0.8, ease: "easeOut" }}
-                                className={`h-full ${range === '< 70' ? 'bg-red-200' : 'bg-indigo-200'} rounded-r-md`}
+                                className={`h-full ${range === '< 70' ? 'bg-red-200' : 'bg-gray-300'} rounded-r-md`}
                             />
                             <span className="absolute inset-y-0 right-2 flex items-center text-xs font-semibold text-gray-600">
                                 {count > 0 ? count : ''}
@@ -104,9 +104,9 @@ export const AnalyticsPage = () => {
                      <span className="font-bold text-blue-900">{totalCandidates}</span>
                  </div>
                  <div className="mx-auto w-0.5 h-4 bg-gray-300"></div>
-                 <div className="flex items-center justify-between p-3 bg-indigo-50 rounded-lg border border-indigo-100 relative z-10 w-[90%] mx-auto">
-                     <span className="font-medium text-indigo-900">Interviewed</span>
-                     <span className="font-bold text-indigo-900">{interviewCount}</span>
+                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 relative z-10 w-[90%] mx-auto">
+                     <span className="font-medium text-gray-900">Interviewed</span>
+                     <span className="font-bold text-gray-900">{interviewCount}</span>
                  </div>
                  <div className="mx-auto w-0.5 h-4 bg-gray-300"></div>
                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100 relative z-10 w-[80%] mx-auto">

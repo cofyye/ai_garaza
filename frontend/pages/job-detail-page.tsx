@@ -64,12 +64,10 @@ export const JobDetailPage = () => {
   }
 
   return (
-    <motion.div 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="p-6 max-w-7xl mx-auto"
+    <div 
+        className="max-w-7xl mx-auto"
     >
-      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4 pl-0 hover:bg-transparent hover:text-indigo-600">
+      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4 pl-0 hover:bg-transparent hover:text-gray-900">
         <ArrowLeft className="h-4 w-4 mr-2" /> Back to Jobs
       </Button>
 
@@ -93,9 +91,9 @@ export const JobDetailPage = () => {
              {/* Salary & Tech Stack */}
              <div className="flex flex-wrap gap-4 mb-8">
                 {job.salary_range && (job.salary_range.min || job.salary_range.max) && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-green-50 rounded-lg border border-green-200">
-                    <DollarSign className="h-4 w-4 text-green-600" />
-                    <span className="text-sm font-medium text-green-800">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border border-gray-200">
+                    <DollarSign className="h-4 w-4 text-gray-600" />
+                    <span className="text-sm font-medium text-gray-900">
                       {job.salary_range.min?.toLocaleString()} - {job.salary_range.max?.toLocaleString()} {job.salary_range.currency}
                     </span>
                   </div>
@@ -104,7 +102,7 @@ export const JobDetailPage = () => {
                   <div className="flex items-center gap-2 flex-wrap">
                     <Code className="h-4 w-4 text-gray-400" />
                     {job.tech_stack.map((tech, i) => (
-                      <span key={i} className="px-2 py-1 bg-gray-100 rounded text-xs font-medium text-gray-600">
+                      <span key={i} className="px-2 py-1 bg-gray-50 border border-gray-100 rounded text-xs font-medium text-gray-600">
                         {tech}
                       </span>
                     ))}
@@ -126,7 +124,7 @@ export const JobDetailPage = () => {
                           <ul className="space-y-3">
                               {job.responsibilities.map((item, i) => (
                                   <li key={i} className="flex gap-3 text-gray-600">
-                                      <Check className="h-5 w-5 text-indigo-600 shrink-0 mt-0.5" />
+                                      <Check className="h-5 w-5 text-gray-900 shrink-0 mt-0.5" />
                                       <span className="leading-relaxed">{item}</span>
                                   </li>
                               ))}
@@ -139,7 +137,7 @@ export const JobDetailPage = () => {
                           <ul className="space-y-3">
                               {job.requirements.map((item, i) => (
                                   <li key={i} className="flex gap-3 text-gray-600">
-                                      <div className="h-1.5 w-1.5 rounded-full bg-gray-400 mt-2.5 shrink-0" />
+                                      <div className="h-1.5 w-1.5 rounded-full bg-gray-300 mt-2.5 shrink-0" />
                                       <span className="leading-relaxed">{item}</span>
                                   </li>
                               ))}
@@ -167,7 +165,7 @@ export const JobDetailPage = () => {
                       <h3 className="font-semibold text-lg text-gray-900 mb-4">Benefits</h3>
                       <div className="flex flex-wrap gap-2">
                           {job.benefits.map((benefit, i) => (
-                              <span key={i} className="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-sm font-medium">
+                              <span key={i} className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
                                   {benefit}
                               </span>
                           ))}
@@ -179,7 +177,7 @@ export const JobDetailPage = () => {
              {/* Footer Action */}
              <div className="mt-10 pt-6 border-t border-gray-100 flex justify-end">
                 <Button 
-                    className="h-12 px-6 text-base shadow-lg shadow-indigo-100 transition-all hover:-translate-y-0.5" 
+                    className="h-12 px-6 text-base shadow-lg shadow-gray-100 transition-all hover:-translate-y-0.5" 
                     onClick={() => setIsLinkModalOpen(true)}
                 >
                   Generate Interview Link
@@ -230,7 +228,7 @@ export const JobDetailPage = () => {
                                         {c.interviewScore ? <span className="font-bold text-gray-900">{c.interviewScore}%</span> : <span className="text-gray-300">—</span>}
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <span className="text-indigo-600 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">View Details &rarr;</span>
+                                        <span className="text-gray-900 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">View Details &rarr;</span>
                                     </td>
                                 </tr>
                             ))}
@@ -251,6 +249,6 @@ export const JobDetailPage = () => {
         onClose={() => setIsLinkModalOpen(false)}
         preselectedJob={job}
       />
-    </motion.div>
+    </div>
   );
 };

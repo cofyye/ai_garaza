@@ -16,14 +16,11 @@ export const KpiRow = ({ children }: { children?: React.ReactNode }) => (
 
 export const KpiCard = ({ label, value }: KpiCardProps) => {
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm"
+    <div 
+      className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow duration-200"
     >
       <dt className="truncate text-sm font-medium text-gray-500">{label}</dt>
-      <dd className="mt-2 text-3xl font-semibold text-gray-900">{value}</dd>
-    </motion.div>
+      <dd className="mt-2 text-3xl font-semibold text-gray-900 tracking-tight">{value}</dd>
+    </div>
   );
 };
