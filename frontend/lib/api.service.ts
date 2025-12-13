@@ -264,6 +264,40 @@ export async function generateAssignment(
   };
 }
 
+/**
+ * Generiši bulk assignments za više kandidata odjednom
+ */
+export async function generateBulkAssignments(
+  applicationIds: string[],
+  autoSend: boolean = true,
+  customRequirements?: string
+): Promise<{
+  total: number;
+  successful: number;
+  failed: number;
+  results: Array<{
+    application_id: string;
+    assignment_id: string;
+    session_url: string;
+    email_sent: boolean;
+    success: boolean;
+  }>;
+  errors: Array<{
+    application_id: string;
+    error: string;
+    success: boolean;
+  }>;
+}> {
+  return await fetchApi<any>("/assignments/generate-bulk", {
+    method: "POST",
+    body: JSON.stringify({
+      application_ids: applicationIds,
+      auto_send: autoSend,
+      custom_requirements: customRequirements || null,
+    }),
+  });
+}
+
 // ============ Assignments API ============
 
 import { Assignment } from "./types";

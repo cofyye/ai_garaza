@@ -110,7 +110,7 @@ export const ClientDetailPage = () => {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-7xl mx-auto space-y-8 pb-12"
+      className="space-y-8 pb-12"
     >
       <button
         onClick={() => navigate(-1)}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Job, Application } from "../lib/types";
-import { getJobById, getApplications } from "../lib/api.service";
+import { getJobById, getApplications, generateBulkAssignments } from "../lib/api.service";
 import { Button, Badge } from "../components/common/ui-primitives";
 import { getStatusColor, formatDate, getInitials } from "../lib/utils";
 import { PageHeader } from "../components/common/page-header";
@@ -21,6 +21,7 @@ import {
   Clock,
   Filter,
   Download,
+  Send,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -32,6 +33,8 @@ export const JobDetailPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [selectedApplications, setSelectedApplications] = useState<string[]>([]);
+  const [isSendingLinks, setIsSendingLinks] = useState(false);
 
   // Fetch job and applications from API
   useEffect(() => {
@@ -60,6 +63,50 @@ export const JobDetailPage = () => {
     fetchData();
   }, [id]);
 
+  // Bulk selection handlers
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedApplications(applications.map(app => app.id));
+    } else {
+      setSelectedApplications([]);
+    }
+  };
+
+  const handleSelectOne = (appId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedApplications(prev => [...prev, appId]);
+    } else {
+      setSelectedApplications(prev => prev.filter(id => id !== appId));
+    }
+  };
+
+  const handleBulkGenerateLinks = async () => {
+    if (!job || selectedApplications.length === 0) return;
+    
+    setIsSendingLinks(true);
+    
+    try {
+      // Send bulk generation request with application IDs directly
+      await generateBulkAssignments(
+        selectedApplications, // application IDs
+        true // auto_send emails
+      );
+      
+      // Clear selection
+      setSelectedApplications([]);
+      
+      // Refresh applications list
+      const updatedApplications = await getApplications({ job_id: job.id });
+      setApplications(updatedApplications);
+      
+    } catch (error) {
+      console.error("Failed to generate bulk assignments:", error);
+      alert("❌ Failed to send links. Please try again.");
+    } finally {
+      setIsSendingLinks(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -82,7 +129,7 @@ export const JobDetailPage = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-12">
+    <div className="space-y-8 pb-12">
       {/* Breadcrumb / Back */}
       <button
         onClick={() => navigate(-1)}
@@ -293,8 +340,33 @@ export const JobDetailPage = () => {
             <span className="px-2.5 py-0.5 rounded-full bg-gray-200 text-gray-700 text-xs font-medium">
               {applications.length}
             </span>
+            {selectedApplications.length > 0 && (
+              <span className="px-2.5 py-0.5 rounded-full bg-black text-white text-xs font-medium">
+                {selectedApplications.length} selected
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2">
+            {selectedApplications.length > 0 && (
+              <Button 
+                onClick={handleBulkGenerateLinks}
+                disabled={isSendingLinks}
+                size="sm" 
+                className="gap-2 bg-black text-white hover:bg-gray-800 disabled:opacity-50"
+              >
+                {isSendingLinks ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" /> 
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" /> 
+                    Send Links ({selectedApplications.length})
+                  </>
+                )}
+              </Button>
+            )}
             <Button variant="ghost" size="sm" className="gap-2 text-gray-600">
               <Filter className="h-4 w-4" /> Filter
             </Button>
@@ -309,6 +381,14 @@ export const JobDetailPage = () => {
             <table className="w-full text-left text-sm">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
+                  <th className="px-6 py-3 w-12">
+                    <input
+                      type="checkbox"
+                      checked={selectedApplications.length === applications.length && applications.length > 0}
+                      onChange={(e) => handleSelectAll(e.target.checked)}
+                      className="rounded border-gray-300 text-black focus:ring-black focus:ring-offset-0 cursor-pointer"
+                    />
+                  </th>
                   <th className="px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">
                     Candidate
                   </th>
@@ -327,10 +407,23 @@ export const JobDetailPage = () => {
                 {applications.slice(0, 10).map((app) => (
                   <tr
                     key={app.id}
-                    onClick={() => navigate(`/applications/${app.id}`)}
-                    className="group hover:bg-gray-50 cursor-pointer transition-colors"
+                    className="group hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-6 py-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedApplications.includes(app.id)}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          handleSelectOne(app.id, e.target.checked);
+                        }}
+                        className="rounded border-gray-300 text-black focus:ring-black focus:ring-offset-0 cursor-pointer"
+                      />
+                    </td>
+                    <td 
+                      className="px-6 py-4 cursor-pointer"
+                      onClick={() => navigate(`/applications/${app.id}`)}
+                    >
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-full bg-gray-900 flex items-center justify-center font-semibold text-white text-xs">
                           {app.user_name
@@ -351,12 +444,18 @@ export const JobDetailPage = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td 
+                      className="px-6 py-4 cursor-pointer"
+                      onClick={() => navigate(`/applications/${app.id}`)}
+                    >
                       <Badge className={getStatusColor(app.status)}>
                         {app.status}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4">
+                    <td 
+                      className="px-6 py-4 cursor-pointer"
+                      onClick={() => navigate(`/applications/${app.id}`)}
+                    >
                       <span className="text-gray-500 text-xs">
                         {formatDate(app.applied_at)}
                       </span>
@@ -365,6 +464,7 @@ export const JobDetailPage = () => {
                       <Button
                         variant="ghost"
                         size="sm"
+                        onClick={() => navigate(`/applications/${app.id}`)}
                         className="opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         View

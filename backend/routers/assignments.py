@@ -23,6 +23,13 @@ class GenerateAssignmentRequest(BaseModel):
     custom_requirements: Optional[str] = None
 
 
+class GenerateBulkAssignmentsRequest(BaseModel):
+    """Request body for bulk assignment generation."""
+    application_ids: list[str]
+    auto_send: bool = False
+    custom_requirements: Optional[str] = None
+
+
 @router.post("/generate/{application_id}", response_model=AssignmentInDB, status_code=201)
 async def generate_assignment(
     application_id: str,
@@ -45,6 +52,56 @@ async def generate_assignment(
         return assignment
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/generate-bulk", status_code=201)
+async def generate_bulk_assignments(
+    request: GenerateBulkAssignmentsRequest,
+    service: AssignmentService = Depends(get_assignment_service)
+):
+    """
+    Generate technical assignments for multiple applications at once.
+    
+    - **application_ids**: List of application IDs to generate assignments for
+    - **auto_send**: If true, send invitation emails immediately
+    - **custom_requirements**: Optional custom instructions for the AI agent
+    
+    Returns a list of generated assignments with their interview links.
+    """
+    results = []
+    errors = []
+    
+    for application_id in request.application_ids:
+        try:
+            # Generate assignment - this also updates application status to "invited"
+            assignment = await service.generate_and_create_assignment(
+                application_id=application_id,
+                auto_send=request.auto_send,
+                custom_requirements=request.custom_requirements
+            )
+            
+            results.append({
+                "application_id": application_id,
+                "assignment_id": assignment.id,
+                "session_url": assignment.session_url,
+                "email_sent": request.auto_send,
+                "success": True
+            })
+            
+        except Exception as e:
+            errors.append({
+                "application_id": application_id,
+                "error": str(e),
+                "success": False
+            })
+    
+    return {
+        "total": len(request.application_ids),
+        "successful": len(results),
+        "failed": len(errors),
+        "results": results,
+        "errors": errors
+    }
 
 
 @router.post("/{assignment_id}/send-email")

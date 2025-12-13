@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Modal, Button, Input } from "../common/ui-primitives";
-import { Job, JobPost, Client, User } from "../../lib/types";
-import { Copy, Send, Mail, Loader2 } from "lucide-react";
-import { getUsers } from "../../lib/api.service";
+import { Job, JobPost, Client, User, Application } from "../../lib/types";
+import { Copy, Send, Mail, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { getUsers, generateBulkAssignments, getApplications } from "../../lib/api.service";
 
 interface GenerateLinkModalProps {
   isOpen: boolean;
   onClose: () => void;
   preselectedJob?: Job | JobPost | null;
   preselectedClient?: Client | null;
+  selectedApplicationIds?: string[];
+  isBulkMode?: boolean;
 }
 
 export const GenerateLinkModal = ({
@@ -16,6 +18,8 @@ export const GenerateLinkModal = ({
   onClose,
   preselectedJob,
   preselectedClient,
+  selectedApplicationIds = [],
+  isBulkMode = false,
 }: GenerateLinkModalProps) => {
   const [selectedJobId, setSelectedJobId] = useState<string>(
     preselectedJob?.id || ""
@@ -27,6 +31,7 @@ export const GenerateLinkModal = ({
   const [copied, setCopied] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [applications, setApplications] = useState<Application[]>([]);
 
   // Get selected client data to display email
   const selectedClientData = useMemo(
@@ -43,8 +48,12 @@ export const GenerateLinkModal = ({
       else setSelectedClientId(""); // Reset if reopening
 
       fetchUsers();
+      
+      if (isBulkMode && selectedApplicationIds.length > 0) {
+        fetchApplications();
+      }
     }
-  }, [isOpen, preselectedJob, preselectedClient]);
+  }, [isOpen, preselectedJob, preselectedClient, isBulkMode, selectedApplicationIds]);
 
   const fetchUsers = async () => {
     setIsLoadingUsers(true);
@@ -58,12 +67,43 @@ export const GenerateLinkModal = ({
     }
   };
 
+  const fetchApplications = async () => {
+    if (!preselectedJob) return;
+    
+    try {
+      const data = await getApplications({ job_id: preselectedJob.id });
+      const selectedApps = data.filter(app => selectedApplicationIds.includes(app.id));
+      setApplications(selectedApps);
+    } catch (error) {
+      console.error("Failed to fetch applications", error);
+    }
+  };
+
   const handleGenerate = () => {
     const mockToken = Math.random().toString(36).substring(7);
     const url = `https://interview.engval.ai/s/${selectedJobId || "j_gen"}/${
       selectedClientId || "c_gen"
     }?token=${mockToken}`;
     setGeneratedLink(url);
+  };
+
+  const handleBulkGenerate = async () => {
+    if (!preselectedJob || applications.length === 0) return;
+    
+    const applicationIds = applications.map(app => app.id);
+    
+    // Fire-and-forget: start generation in background
+    generateBulkAssignments(
+      applicationIds,
+      true // auto_send emails
+    ).then(() => {
+      console.log(`✅ Successfully sent interview links to ${applicationIds.length} candidates`);
+    }).catch((error) => {
+      console.error("Failed to generate bulk assignments:", error);
+    });
+    
+    // Close modal immediately
+    onClose();
   };
 
   const handleCopy = () => {
@@ -73,10 +113,66 @@ export const GenerateLinkModal = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Generate Interview Link">
-      <div className="space-y-5">
-        {/* Client Selection */}
-        {!preselectedClient && (
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      title={isBulkMode ? `Generate Links for ${applications.length} Candidates` : "Generate Interview Link"}
+    >
+      <div className="space-y-5">{isBulkMode ? (
+        // Bulk Mode UI - Simple confirmation before sending
+        <>
+          <div className="space-y-3">
+            <p className="text-sm text-gray-600">
+              You are about to generate interview links and send invitations to the following candidates:
+            </p>
+            <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-lg">
+              {applications.map((app) => (
+                <div 
+                  key={app.id}
+                  className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 last:border-0"
+                >
+                  <div className="h-8 w-8 rounded-full bg-gray-900 flex items-center justify-center font-semibold text-white text-xs shrink-0">
+                    {app.user_name
+                      ? app.user_name.split(" ").map((n) => n[0]).join("").toUpperCase()
+                      : "?"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm text-gray-900 truncate">
+                      {app.user_name || "Unknown"}
+                    </div>
+                    <div className="text-xs text-gray-500 truncate">
+                      {app.user_email || "No email"}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 italic">
+              Links will be generated and sent in the background. You can continue working.
+            </p>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              variant="ghost"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleBulkGenerate}
+              className="gap-2 bg-black hover:bg-gray-800 text-white"
+            >
+              <Send className="h-4 w-4" />
+              Generate & Send All
+            </Button>
+          </div>
+        </>
+      ) : (
+        // Single Mode UI (existing)
+        <>
+          {/* Client Selection */}
+          {!preselectedClient && (
           <div className="space-y-1.5">
             <label className="block text-xs font-semibold text-gray-900 uppercase tracking-wide">
               Select Candidate
@@ -192,6 +288,8 @@ export const GenerateLinkModal = ({
             </div>
           </div>
         )}
+        </>
+      )}
       </div>
     </Modal>
   );

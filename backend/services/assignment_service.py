@@ -43,7 +43,7 @@ class AITaskGenerator:
         
         # Use structured output with Pydantic model
         self.llm = ChatOpenAI(
-            model="gpt-5",
+            model="gpt-4.1-nano-2025-04-14",
             temperature=1, 
             api_key=api_key
         ).with_structured_output(GeneratedTask)
