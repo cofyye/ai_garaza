@@ -17,6 +17,7 @@ class UserBase(BaseModel):
     github_url: Optional[str] = None
     portfolio_url: Optional[str] = None
     resume_url: Optional[str] = None
+    bio: Optional[str] = None
 
 
 class UserCreate(UserBase):
@@ -34,11 +35,13 @@ class UserUpdate(BaseModel):
     github_url: Optional[str] = None
     portfolio_url: Optional[str] = None
     resume_url: Optional[str] = None
+    bio: Optional[str] = None
 
 
 class UserInDB(UserBase):
     """User as stored in database."""
     id: str = Field(alias="_id")
+    applications_count: int = Field(default=0, description="Number of job applications")
     created_at: datetime
     updated_at: datetime
 
@@ -53,6 +56,7 @@ class UserInDB(UserBase):
                 "location": "Belgrade, Serbia",
                 "linkedin_url": "https://linkedin.com/in/johndoe",
                 "github_url": "https://github.com/johndoe",
+                "applications_count": 3,
                 "created_at": "2024-01-01T00:00:00",
                 "updated_at": "2024-01-01T00:00:00"
             }
