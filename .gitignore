@@ -44,3 +44,5 @@ htmlcov/
 *.pyo
 *.pyd
 .Python
+
+.github
