@@ -1,12 +1,11 @@
-import React from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Sidebar } from './components/layout/sidebar';
-import { Topbar } from './components/layout/topbar';
-import { ClientsPage } from './pages/clients-page';
-import { JobsPage } from './pages/jobs-page';
-import { ClientDetailPage } from './pages/client-detail-page';
-import { JobDetailPage } from './pages/job-detail-page';
-import { AnalyticsPage } from './pages/analytics-page';
+import React from "react";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Sidebar } from "./components/layout/sidebar";
+import { Topbar } from "./components/layout/topbar";
+import { ApplicationsPage } from "./pages/applications-page";
+import { JobsPage } from "./pages/jobs-page";
+import { JobDetailPage } from "./pages/job-detail-page";
+import { AnalyticsPage } from "./pages/analytics-page";
 
 const AppLayout = ({ children }: { children?: React.ReactNode }) => {
   return (
@@ -30,8 +29,7 @@ export default function App() {
       <AppLayout>
         <Routes>
           <Route path="/" element={<Navigate to="/jobs" replace />} />
-          <Route path="/clients" element={<ClientsPage />} />
-          <Route path="/clients/:id" element={<ClientDetailPage />} />
+          <Route path="/applications" element={<ApplicationsPage />} />
           <Route path="/jobs" element={<JobsPage />} />
           <Route path="/jobs/:id" element={<JobDetailPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />

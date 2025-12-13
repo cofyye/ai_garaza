@@ -1,5 +1,9 @@
 // ============ Client Types (za buduće korišćenje) ============
-export type ClientStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED" | "EXPIRED";
+export type ClientStatus =
+  | "NOT_STARTED"
+  | "IN_PROGRESS"
+  | "COMPLETED"
+  | "EXPIRED";
 export type ClientVerdict = "STRONG_HIRE" | "HIRE" | "NO_HIRE";
 
 export interface Client {
@@ -17,8 +21,19 @@ export interface Client {
 }
 
 // ============ Job Types (usklađeno sa backend API-jem) ============
-export type JobType = "full-time" | "part-time" | "contract" | "internship" | "freelance";
-export type ExperienceLevel = "intern" | "junior" | "mid" | "senior" | "lead" | "staff";
+export type JobType =
+  | "full-time"
+  | "part-time"
+  | "contract"
+  | "internship"
+  | "freelance";
+export type ExperienceLevel =
+  | "intern"
+  | "junior"
+  | "mid"
+  | "senior"
+  | "lead"
+  | "staff";
 export type LocationType = "remote" | "onsite" | "hybrid";
 export type JobStatus = "active" | "closed" | "draft";
 
@@ -106,6 +121,78 @@ export interface JobPost {
   };
 }
 
+// ============ Application Types ============
+export type ApplicationStatus =
+  | "pending"
+  | "invited"
+  | "completed"
+  | "reviewed"
+  | "accepted"
+  | "rejected";
+
+export interface Application {
+  id: string;
+  user_id: string;
+  job_id: string;
+  cover_letter?: string;
+  additional_info?: string;
+  status: ApplicationStatus;
+  notes?: string;
+  applied_at: string; // ISO
+  updated_at: string; // ISO
+  reviewed_at?: string; // ISO
+  user_email?: string;
+  user_name?: string;
+  job_title?: string;
+  company_name?: string;
+}
+
+export interface ApplicationCreate {
+  user_id: string;
+  job_id: string;
+  cover_letter?: string;
+  additional_info?: string;
+}
+
+export interface ApplicationUpdate {
+  status?: ApplicationStatus;
+  notes?: string;
+}
+
+// ============ Assignment Types ============
+export type AssignmentDifficulty = "easy" | "mid" | "hard";
+export type AssignmentStatus =
+  | "pending"
+  | "sent"
+  | "in_progress"
+  | "submitted"
+  | "reviewed";
+
+export interface Assignment {
+  id: string;
+  application_id: string;
+  task_title: string;
+  task_description: string;
+  task_requirements: string[];
+  evaluation_criteria: string[];
+  difficulty: AssignmentDifficulty;
+  time_limit_hours: number;
+  additional_resources?: string;
+  status: AssignmentStatus;
+  created_at: string; // ISO
+  sent_at?: string; // ISO
+  deadline?: string; // ISO
+  started_at?: string; // ISO
+  submitted_at?: string; // ISO
+  reviewed_at?: string; // ISO
+  submission_url?: string;
+  candidate_notes?: string;
+  reviewer_feedback?: string;
+  score?: number;
+  email_sent_count: number;
+  last_email_sent_at?: string; // ISO
+}
+
 // ============ Filter State Types ============
 export interface ClientFiltersState {
   search: string;
@@ -117,4 +204,10 @@ export interface ClientFiltersState {
 export interface JobFiltersState {
   search: string;
   status: JobStatus | "ALL";
+}
+
+export interface ApplicationFiltersState {
+  search: string;
+  status: ApplicationStatus | "ALL";
+  job_id?: string;
 }

@@ -1,19 +1,24 @@
 import React from "react";
 import { useLocation, Link } from "react-router-dom";
-import { 
-  Users, 
-  Briefcase, 
-  MessageSquare, 
-  BarChart2, 
-  Settings, 
-  HelpCircle, 
-  Cpu 
+import {
+  Users,
+  Briefcase,
+  MessageSquare,
+  BarChart2,
+  Settings,
+  HelpCircle,
+  Cpu,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 const NAV_ITEMS = [
   { label: "Job Posts", icon: Briefcase, path: "/jobs", disabled: false },
-  { label: "Clients", icon: Users, path: "/clients", disabled: false },
+  {
+    label: "Applications",
+    icon: Users,
+    path: "/applications",
+    disabled: false,
+  },
   { label: "Analytics", icon: BarChart2, path: "/analytics", disabled: false },
   // Visually enabled (disabled: false) but path set to "#" so user cannot enter
   { label: "Interviews", icon: MessageSquare, path: "#", disabled: false },
@@ -42,14 +47,17 @@ export const Sidebar = () => {
                 isActive
                   ? "bg-black text-white shadow-lg shadow-gray-200"
                   : "text-gray-500 hover:bg-white hover:text-black hover:shadow-sm",
-                item.disabled && "cursor-not-allowed opacity-50 hover:bg-transparent hover:shadow-none"
+                item.disabled &&
+                  "cursor-not-allowed opacity-50 hover:bg-transparent hover:shadow-none"
               )}
               onClick={(e) => item.path === "#" && e.preventDefault()}
             >
               <item.icon
                 className={cn(
                   "mr-3 h-5 w-5 flex-shrink-0 transition-colors",
-                  isActive ? "text-white" : "text-gray-400 group-hover:text-black"
+                  isActive
+                    ? "text-white"
+                    : "text-gray-400 group-hover:text-black"
                 )}
               />
               {item.label}
