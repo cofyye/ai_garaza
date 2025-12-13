@@ -40,7 +40,7 @@ app.add_middleware(
 async def root():
     """Health check endpoint."""
     return {
-        "message": "AI Garaza API is running",
+        "message": "Engval.ai API is running",
         "version": settings.APP_VERSION
     }
 

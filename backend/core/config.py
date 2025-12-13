@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     """Application settings."""
     
     # App Config
-    APP_NAME: str = "AI Garaza API"
+    APP_NAME: str = "Engval.ai API"
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = False
     

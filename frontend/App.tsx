@@ -29,17 +29,39 @@ const DashboardLayout = () => {
 export default function App() {
   return (
     <HashRouter>
-      <AppLayout>
-        <Routes>
+      <Routes>
+        {/* Interview session page without layout */}
+        <Route
+          path="/interview/:sessionId"
+          element={<InterviewSessionPage />}
+        />
+
+        {/* Main app routes with layout */}
+        <Route
+          path="*"
+          element={
+                  <Routes>
+              {/* Dashboard Routes (with Sidebar/Topbar) */}
+        <Route element={<DashboardLayout />}>
           <Route path="/" element={<Navigate to="/jobs" replace />} />
-          <Route path="/applications" element={<ApplicationsPage />} />
-          <Route path="/jobs" element={<JobsPage />} />
-          <Route path="/jobs/:id" element={<JobDetailPage />} />
-          <Route path="/applications/:id" element={<ClientDetailPage />} />
-          <Route path="/analytics" element={<AnalyticsPage />} />
-          <Route path="*" element={<Navigate to="/jobs" replace />} />
-        </Routes>
-      </AppLayout>
+                <Route path="/applications" element={<ApplicationsPage />} />
+                <Route path="/jobs" element={<JobsPage />} />
+                <Route path="/jobs/:id" element={<JobDetailPage />} />
+                <Route
+                  path="/applications/:id"
+                  element={<ClientDetailPage />}
+                />
+                <Route path="/analytics" element={<AnalyticsPage />} />
+              </Route>
+
+        {/* Standalone Routes (Full Screen) */}
+        <Route path="/interview-room" element={<InterviewRoomPage />} />
+        
+        <Route path="*" element={<Navigate to="/jobs" replace />} />
+            </Routes>
+                }
+        />
+      </Routes>
     </HashRouter>
   );
 }
