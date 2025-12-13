@@ -324,8 +324,30 @@ export async function getUsers(params?: GetUsersParams): Promise<User[]> {
   }));
 }
 
-// ============ Future APIs (placeholder) ============
+// ============ Sessions API ============
 
-// Clients API će biti dodat kasnije kada backend podrži
-// export async function getClients() { ... }
-// export async function getClientById(id: string) { ... }
+/**
+ * Dohvati interview sesiju po session_id
+ */
+export async function getSession(sessionId: string) {
+  const assignment = await fetchApi<any>(`/sessions/${sessionId}`);
+  return {
+    ...assignment,
+    id: assignment._id || assignment.id,
+  };
+}
+
+/**
+ * Završi interview sesiju
+ */
+export async function completeSession(
+  sessionId: string,
+  candidateNotes?: string
+) {
+  const body = candidateNotes ? { candidate_notes: candidateNotes } : {};
+
+  return await fetchApi(`/sessions/${sessionId}/complete`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}

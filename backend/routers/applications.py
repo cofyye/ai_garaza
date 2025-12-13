@@ -34,7 +34,6 @@ async def create_application(
     
     - **user_id**: ID of the user applying
     - **job_id**: ID of the job position
-    - **cover_letter**: Optional cover letter
     - **generate_task**: If true, automatically generate technical assignment
     - **send_email**: If true, send invitation email immediately (requires generate_task=true)
     """

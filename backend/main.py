@@ -46,9 +46,10 @@ async def root():
 
 
 # Routers
-from routers import applications, assignments, jobs, users
+from routers import applications, assignments, jobs, sessions, users
 
 app.include_router(jobs.router, prefix="/api/jobs", tags=["jobs"])
 app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(applications.router, prefix="/api/applications", tags=["applications"])
 app.include_router(assignments.router, prefix="/api/assignments", tags=["assignments"])
+app.include_router(sessions.router, prefix="/api/sessions", tags=["sessions"])

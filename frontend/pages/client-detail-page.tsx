@@ -271,18 +271,6 @@ export const ClientDetailPage = () => {
               </div>
             )}
           </div>
-
-          {/* Cover Letter */}
-          {application.cover_letter && (
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
-              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">
-                Cover Letter
-              </h3>
-              <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed whitespace-pre-wrap">
-                {application.cover_letter}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* RIGHT COLUMN: Sidebar Info */}

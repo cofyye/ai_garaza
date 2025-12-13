@@ -47,9 +47,6 @@ export const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Applied
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Cover Letter
-              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -90,17 +87,6 @@ export const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
                   {formatDistanceToNow(new Date(application.applied_at), {
                     addSuffix: true,
                   })}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
-                  {application.cover_letter ? (
-                    <span className="line-clamp-2">
-                      {application.cover_letter}
-                    </span>
-                  ) : (
-                    <span className="text-gray-400 italic">
-                      No cover letter
-                    </span>
-                  )}
                 </td>
               </tr>
             ))}

@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Application, Assignment } from "../../lib/types";
-import { X, Mail, Clock, CheckCircle, Calendar, Send, Briefcase, Building2, User } from "lucide-react";
+import {
+  X,
+  Mail,
+  Clock,
+  CheckCircle,
+  Calendar,
+  Send,
+  Briefcase,
+  Building2,
+  User,
+  FileText,
+} from "lucide-react";
 import { Button, Badge } from "../common/ui-primitives";
 import {
   getAssignmentByApplication,
@@ -94,24 +105,36 @@ export const ApplicationDrawer: React.FC<ApplicationDrawerProps> = ({
                 <h2 className="text-2xl font-bold text-gray-900">
                   {application.user_name || "Unknown Candidate"}
                 </h2>
-                <Badge className={`${statusStyles[application.status] || "bg-gray-100 text-gray-800"} border`}>
-                  {(statusLabels[application.status] || application.status).toUpperCase()}
+                <Badge
+                  className={`${
+                    statusStyles[application.status] ||
+                    "bg-gray-100 text-gray-800"
+                  } border`}
+                >
+                  {(
+                    statusLabels[application.status] || application.status
+                  ).toUpperCase()}
                 </Badge>
               </div>
-              
+
               <div className="flex flex-wrap gap-3">
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
-                  <Mail className="h-3.5 w-3.5 text-gray-500" /> {application.user_email || "No email"}
+                  <Mail className="h-3.5 w-3.5 text-gray-500" />{" "}
+                  {application.user_email || "No email"}
                 </div>
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
-                  <Briefcase className="h-3.5 w-3.5 text-gray-500" /> {application.job_title}
+                  <Briefcase className="h-3.5 w-3.5 text-gray-500" />{" "}
+                  {application.job_title}
                 </div>
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
-                  <Clock className="h-3.5 w-3.5 text-gray-500" /> Applied {formatDistanceToNow(new Date(application.applied_at), { addSuffix: true })}
+                  <Clock className="h-3.5 w-3.5 text-gray-500" /> Applied{" "}
+                  {formatDistanceToNow(new Date(application.applied_at), {
+                    addSuffix: true,
+                  })}
                 </div>
               </div>
             </div>
-            
+
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-500 transition-colors p-2 hover:bg-gray-100 rounded-full"
@@ -123,10 +146,11 @@ export const ApplicationDrawer: React.FC<ApplicationDrawerProps> = ({
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-8 space-y-6">
-          
           {/* Technical Assignment Card */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6">Technical Assignment</h3>
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6">
+              Technical Assignment
+            </h3>
 
             {isLoadingAssignment ? (
               <div className="flex items-center justify-center py-8">
@@ -146,11 +170,15 @@ export const ApplicationDrawer: React.FC<ApplicationDrawerProps> = ({
                       </span>
                     </p>
                   </div>
-                  <Badge className={
-                    assignment.status === "sent" ? "bg-blue-100 text-blue-800 border-blue-200" :
-                    assignment.status === "submitted" ? "bg-green-100 text-green-800 border-green-200" :
-                    "bg-gray-100 text-gray-800 border-gray-200"
-                  }>
+                  <Badge
+                    className={
+                      assignment.status === "sent"
+                        ? "bg-blue-100 text-blue-800 border-blue-200"
+                        : assignment.status === "submitted"
+                        ? "bg-green-100 text-green-800 border-green-200"
+                        : "bg-gray-100 text-gray-800 border-gray-200"
+                    }
+                  >
                     {assignment.status.toUpperCase()}
                   </Badge>
                 </div>
@@ -163,7 +191,10 @@ export const ApplicationDrawer: React.FC<ApplicationDrawerProps> = ({
                   {assignment.deadline && (
                     <div className="flex items-center gap-2 text-sm text-gray-600 bg-white p-3 rounded-lg border border-blue-100">
                       <Calendar className="h-4 w-4 text-blue-500" />
-                      <span>Due {format(new Date(assignment.deadline), "MMM d, HH:mm")}</span>
+                      <span>
+                        Due{" "}
+                        {format(new Date(assignment.deadline), "MMM d, HH:mm")}
+                      </span>
                     </div>
                   )}
                   <div className="flex items-center gap-2 text-sm text-gray-600 bg-white p-3 rounded-lg border border-blue-100">
@@ -172,17 +203,44 @@ export const ApplicationDrawer: React.FC<ApplicationDrawerProps> = ({
                   </div>
                 </div>
 
+                {/* Interview Session URL */}
+                {assignment.session_url && (
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-4">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <FileText className="h-4 w-4 text-blue-600" />
+                      Interview Session Link
+                    </p>
+                    <a
+                      href={assignment.session_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:text-blue-700 font-medium underline break-all block mb-2"
+                    >
+                      {assignment.session_url}
+                    </a>
+                    <p className="text-xs text-gray-600">
+                      Candidate can access their technical interview using this
+                      unique link.
+                    </p>
+                  </div>
+                )}
+
                 <div className="pt-4 border-t border-blue-100">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
                     Key Requirements
                   </p>
                   <ul className="space-y-2">
-                    {assignment.task_requirements.slice(0, 3).map((req, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
-                        <div className="h-1.5 w-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
-                        <span>{req}</span>
-                      </li>
-                    ))}
+                    {assignment.task_requirements
+                      .slice(0, 3)
+                      .map((req, idx) => (
+                        <li
+                          key={idx}
+                          className="flex items-start gap-2 text-sm text-gray-700"
+                        >
+                          <div className="h-1.5 w-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
+                          <span>{req}</span>
+                        </li>
+                      ))}
                   </ul>
                 </div>
               </div>
@@ -191,8 +249,12 @@ export const ApplicationDrawer: React.FC<ApplicationDrawerProps> = ({
                 <div className="bg-white p-3 rounded-full w-fit mx-auto mb-4 shadow-sm border border-gray-100">
                   <Send className="h-6 w-6 text-gray-400" />
                 </div>
-                <h4 className="text-sm font-medium text-gray-900 mb-1">No Assignment Sent</h4>
-                <p className="text-sm text-gray-500 mb-6">Generate a technical task for this candidate.</p>
+                <h4 className="text-sm font-medium text-gray-900 mb-1">
+                  No Assignment Sent
+                </h4>
+                <p className="text-sm text-gray-500 mb-6">
+                  Generate a technical task for this candidate.
+                </p>
                 <Button
                   onClick={handleGenerateAssignment}
                   disabled={isGenerating}
@@ -204,32 +266,24 @@ export const ApplicationDrawer: React.FC<ApplicationDrawerProps> = ({
                       Generating...
                     </>
                   ) : (
-                    <>
-                      Generate & Send Assignment
-                    </>
+                    <>Generate & Send Assignment</>
                   )}
                 </Button>
                 {error && (
-                  <p className="text-sm text-red-600 mt-4 bg-red-50 py-2 px-3 rounded-lg inline-block border border-red-100">{error}</p>
+                  <p className="text-sm text-red-600 mt-4 bg-red-50 py-2 px-3 rounded-lg inline-block border border-red-100">
+                    {error}
+                  </p>
                 )}
               </div>
             )}
           </div>
 
-          {/* Cover Letter Card */}
-          {application.cover_letter && (
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
-              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Cover Letter</h3>
-              <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed whitespace-pre-wrap">
-                {application.cover_letter}
-              </div>
-            </div>
-          )}
-
           {/* Internal Notes Card */}
           {application.notes && (
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
-              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Internal Notes</h3>
+              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">
+                Internal Notes
+              </h3>
               <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-100 text-sm text-yellow-800 leading-relaxed">
                 {application.notes}
               </div>

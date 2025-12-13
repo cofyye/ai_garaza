@@ -23,7 +23,6 @@ class ApplicationBase(BaseModel):
     """Base application fields."""
     user_id: str = Field(..., description="User (candidate) ID")
     job_id: str = Field(..., description="Job posting ID")
-    cover_letter: Optional[str] = Field(None, description="Optional cover letter")
     additional_info: Optional[str] = Field(None, description="Additional information")
 
 
@@ -35,7 +34,6 @@ class ApplicationCreate(ApplicationBase):
 class ApplicationUpdate(BaseModel):
     """Application update schema."""
     status: Optional[ApplicationStatus] = None
-    cover_letter: Optional[str] = None
     additional_info: Optional[str] = None
     notes: Optional[str] = Field(None, description="Internal notes from recruiter")
 
@@ -62,7 +60,6 @@ class ApplicationInDB(ApplicationBase):
                 "user_id": "507f1f77bcf86cd799439012",
                 "job_id": "507f1f77bcf86cd799439013",
                 "status": "pending",
-                "cover_letter": "I am very interested in this position...",
                 "applied_at": "2024-01-01T00:00:00",
                 "updated_at": "2024-01-01T00:00:00"
             }

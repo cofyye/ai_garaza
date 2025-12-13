@@ -128,7 +128,6 @@ export interface Application {
   id: string;
   user_id: string;
   job_id: string;
-  cover_letter?: string;
   additional_info?: string;
   status: ApplicationStatus;
   notes?: string;
@@ -143,7 +142,6 @@ export interface Application {
 export interface ApplicationCreate {
   user_id: string;
   job_id: string;
-  cover_letter?: string;
   additional_info?: string;
 }
 
@@ -200,6 +198,8 @@ export interface Assignment {
   score?: number;
   email_sent_count: number;
   last_email_sent_at?: string; // ISO
+  session_id?: string;
+  session_url?: string;
 }
 
 // ============ Filter State Types ============

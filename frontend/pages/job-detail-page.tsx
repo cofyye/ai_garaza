@@ -23,12 +23,10 @@ import {
   Download,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { GenerateLinkModal } from "../components/jobs/generate-link-modal";
 
 export const JobDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [job, setJob] = useState<Job | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -126,9 +124,6 @@ export const JobDetailPage = () => {
             <div className="flex items-center gap-3">
               <Button variant="outline" onClick={() => alert("Stub: Edit Job")}>
                 Edit Job
-              </Button>
-              <Button onClick={() => setIsLinkModalOpen(true)}>
-                Generate Interview Link
               </Button>
             </div>
           </div>
@@ -400,25 +395,12 @@ export const JobDetailPage = () => {
               No applications yet
             </h3>
             <p className="text-sm text-gray-500 mt-1 max-w-sm mx-auto">
-              Share the interview link to start receiving applications for this
-              position.
+              Applications will appear here when candidates apply through the
+              system.
             </p>
-            <Button
-              variant="outline"
-              onClick={() => setIsLinkModalOpen(true)}
-              className="mt-4"
-            >
-              Generate Link
-            </Button>
           </div>
         )}
       </div>
-
-      <GenerateLinkModal
-        isOpen={isLinkModalOpen}
-        onClose={() => setIsLinkModalOpen(false)}
-        preselectedJob={job}
-      />
     </div>
   );
 };

@@ -248,6 +248,10 @@ class AssignmentService:
             difficulty=difficulty
         )
         
+        # Generate unique session ID
+        import secrets
+        session_id = secrets.token_urlsafe(32)
+        
         # Create assignment
         assignment_data = {
             "application_id": application_id,
@@ -255,6 +259,8 @@ class AssignmentService:
             "time_limit_hours": 72,  # Default 72 hours
             **generated_task,
             "status": AssignmentStatus.PENDING,
+            "session_id": session_id,
+            "session_url": f"http://localhost:3000/#/interview/{session_id}",  # Frontend URL
             "created_at": datetime.utcnow(),
             "email_sent_count": 0
         }
@@ -427,3 +433,60 @@ class AssignmentService:
                 stats["time_taken_hours"] = (assignment.submitted_at - assignment.started_at).total_seconds() / 3600
         
         return stats
+    
+    async def get_assignment_by_session_id(self, session_id: str) -> Optional[AssignmentInDB]:
+        """Get assignment by session ID."""
+        assignment = await self.collection.find_one({"session_id": session_id})
+        if assignment:
+            assignment["_id"] = str(assignment["_id"])
+            return AssignmentInDB(**assignment)
+        return None
+    
+    async def mark_assignment_started(self, assignment_id: str) -> Optional[AssignmentInDB]:
+        """Mark assignment as started."""
+        if not ObjectId.is_valid(assignment_id):
+            return None
+        
+        update_data = {
+            "status": AssignmentStatus.IN_PROGRESS,
+            "started_at": datetime.utcnow()
+        }
+        
+        result = await self.collection.find_one_and_update(
+            {"_id": ObjectId(assignment_id)},
+            {"$set": update_data},
+            return_document=True
+        )
+        
+        if result:
+            result["_id"] = str(result["_id"])
+            return AssignmentInDB(**result)
+        return None
+    
+    async def mark_assignment_submitted(
+        self, 
+        assignment_id: str,
+        candidate_notes: Optional[str] = None
+    ) -> Optional[AssignmentInDB]:
+        """Mark assignment as submitted."""
+        if not ObjectId.is_valid(assignment_id):
+            return None
+        
+        update_data = {
+            "status": AssignmentStatus.SUBMITTED,
+            "submitted_at": datetime.utcnow()
+        }
+        
+        if candidate_notes:
+            update_data["candidate_notes"] = candidate_notes
+        
+        result = await self.collection.find_one_and_update(
+            {"_id": ObjectId(assignment_id)},
+            {"$set": update_data},
+            return_document=True
+        )
+        
+        if result:
+            result["_id"] = str(result["_id"])
+            return AssignmentInDB(**result)
+        return None

@@ -57,6 +57,10 @@ class AssignmentInDB(AssignmentBase):
     id: str = Field(alias="_id")
     status: AssignmentStatus = AssignmentStatus.PENDING
     
+    # Interview session
+    session_id: Optional[str] = Field(None, description="Unique session ID for interview")
+    session_url: Optional[str] = Field(None, description="Full URL to interview session")
+    
     # Timing
     created_at: datetime
     sent_at: Optional[datetime] = None

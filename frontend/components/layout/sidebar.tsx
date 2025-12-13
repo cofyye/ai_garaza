@@ -32,7 +32,7 @@ export const Sidebar = () => {
     <aside className="hidden w-64 flex-col bg-transparent md:flex h-screen sticky top-0">
       <div className="flex h-20 items-center px-6">
         <Cpu className="mr-2 h-8 w-8 text-black" />
-        <span className="text-xl font-bold text-black">TalentAI</span>
+        <span className="text-xl font-bold text-black">Engval.ai</span>
       </div>
 
       <nav className="flex-1 space-y-2 px-4 mt-10">
