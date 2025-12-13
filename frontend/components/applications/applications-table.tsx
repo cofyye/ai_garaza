@@ -1,28 +1,20 @@
 import React from "react";
 import { Application } from "../../lib/types";
 import { formatDistanceToNow } from "date-fns";
+import { getStatusColor } from "../../lib/utils";
 
 interface ApplicationsTableProps {
   applications: Application[];
   onSelectApplication: (application: Application) => void;
 }
 
-const statusStyles: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  invited: "bg-blue-100 text-blue-800",
-  completed: "bg-purple-100 text-purple-800",
-  reviewed: "bg-indigo-100 text-indigo-800",
-  accepted: "bg-green-100 text-green-800",
-  rejected: "bg-red-100 text-red-800",
-};
-
 const statusLabels: Record<string, string> = {
-  pending: "Pending",
-  invited: "Invited",
-  completed: "Completed",
-  reviewed: "Reviewed",
-  accepted: "Accepted",
-  rejected: "Rejected",
+  pending: "pending",
+  invited: "invited",
+  completed: "completed",
+  reviewed: "reviewed",
+  accepted: "accepted",
+  rejected: "rejected",
 };
 
 export const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
@@ -75,10 +67,9 @@ export const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      statusStyles[application.status] ||
-                      "bg-gray-100 text-gray-800"
-                    }`}
+                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
+                      application.status
+                    )}`}
                   >
                     {statusLabels[application.status] || application.status}
                   </span>

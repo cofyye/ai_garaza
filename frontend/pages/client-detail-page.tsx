@@ -104,15 +104,6 @@ export const ClientDetailPage = () => {
     );
   }
 
-  const statusStyles: Record<string, string> = {
-    pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
-    invited: "bg-blue-100 text-blue-800 border-blue-200",
-    completed: "bg-purple-100 text-purple-800 border-purple-200",
-    reviewed: "bg-indigo-100 text-indigo-800 border-indigo-200",
-    accepted: "bg-green-100 text-green-800 border-green-200",
-    rejected: "bg-red-100 text-red-800 border-red-200",
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -136,12 +127,9 @@ export const ClientDetailPage = () => {
                   {application.user_name || "Unknown Candidate"}
                 </h1>
                 <Badge
-                  className={`${
-                    statusStyles[application.status] ||
-                    "bg-gray-100 text-gray-800"
-                  } border`}
+                  className={`${getStatusColor(application.status)} border`}
                 >
-                  {application.status.toUpperCase()}
+                  {application.status}
                 </Badge>
               </div>
 
@@ -170,9 +158,9 @@ export const ClientDetailPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* LEFT COLUMN: Main Content */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 flex flex-col">
           {/* Technical Assignment Card */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 h-full">
             <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6">
               Technical Assignment
             </h3>
@@ -200,7 +188,7 @@ export const ClientDetailPage = () => {
                         : "bg-gray-100 text-gray-800 border-gray-200"
                     }
                   >
-                    {assignment.status.toUpperCase()}
+                    {assignment.status}
                   </Badge>
                 </div>
 
@@ -294,59 +282,44 @@ export const ClientDetailPage = () => {
             </Button>
           </div>
 
-          {/* Timeline / History Placeholder */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">
+          {/* Timeline / History */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 flex-1">
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6">
               Activity
             </h3>
-            <div className="relative pl-2 space-y-6">
-              <div className="absolute left-[7px] top-2 bottom-2 w-[2px] bg-gray-100" />
-
-              <div className="relative flex gap-3">
-                <div className="relative z-10 h-4 w-4 rounded-full bg-blue-500 border-2 border-white ring-1 ring-gray-100 shrink-0" />
-                <div>
-                  <p className="text-xs font-bold text-gray-900">
+            <div className="relative pl-6 border-l border-gray-200 space-y-8 ml-3">
+              <div className="relative">
+                <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-gray-200 ring-4 ring-white border border-gray-300" />
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-gray-900">
                     Application Received
-                  </p>
-                  <p className="text-[10px] text-gray-500">
+                  </span>
+                  <span className="text-xs text-gray-500 mt-0.5">
                     {formatDistanceToNow(new Date(application.applied_at), {
                       addSuffix: true,
                     })}
-                  </p>
+                  </span>
                 </div>
               </div>
 
               {assignment && (
-                <div className="relative flex gap-3">
-                  <div className="relative z-10 h-4 w-4 rounded-full bg-purple-500 border-2 border-white ring-1 ring-gray-100 shrink-0" />
-                  <div>
-                    <p className="text-xs font-bold text-gray-900">
+                <div className="relative">
+                  <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-black ring-4 ring-white" />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-gray-900">
                       Assignment Sent
-                    </p>
-                    <p className="text-[10px] text-gray-500">
+                    </span>
+                    <span className="text-xs text-gray-500 mt-0.5">
                       {assignment.sent_at
                         ? formatDistanceToNow(new Date(assignment.sent_at), {
                             addSuffix: true,
                           })
                         : "Recently"}
-                    </p>
+                    </span>
                   </div>
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex flex-col gap-3 mt-auto">
-            <Button className="w-full bg-gray-100 text-gray-900 hover:bg-gray-200 border border-gray-200 h-12 text-base">
-              Schedule Interview
-            </Button>
-            <Button
-              onClick={() => alert("Stub: Send Email")}
-              className="w-full bg-black text-white hover:bg-gray-800 h-12 text-base shadow-sm"
-            >
-              Send Email
-            </Button>
           </div>
         </div>
       </div>

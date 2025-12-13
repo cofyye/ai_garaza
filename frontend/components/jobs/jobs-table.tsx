@@ -62,7 +62,7 @@ export const JobsTable = ({ jobs, onSelectJob }: JobsTableProps) => {
                   </td>
                   <td className="px-6 py-4">
                     <Badge className={getStatusColor(job.status)}>
-                      {job.status.toUpperCase()}
+                      {job.status}
                     </Badge>
                   </td>
                   <td className="px-6 py-4">

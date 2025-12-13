@@ -109,7 +109,7 @@ export const JobsPage = () => {
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              {s === "ALL" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
+              {s === "ALL" ? "All" : s}
             </button>
           ))}
         </div>

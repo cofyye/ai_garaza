@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Assignment } from "../lib/types";
 import { getSession, completeSession } from "../lib/api.service";
 import { Button, Badge } from "../components/common/ui-primitives";
-import { formatDate } from "../lib/utils";
+import { getStatusColor, formatDate } from "../lib/utils";
 import {
   ArrowLeft,
   CheckCircle,
@@ -144,19 +144,11 @@ export const InterviewSessionPage = () => {
                 {assignment.task_title}
               </h1>
               <div className="flex items-center gap-3 flex-wrap">
-                <Badge
-                  className={
-                    assignment.status === "submitted"
-                      ? "bg-green-100 text-green-800 border-green-200"
-                      : assignment.status === "in_progress"
-                      ? "bg-yellow-100 text-yellow-800 border-yellow-200"
-                      : "bg-gray-100 text-gray-800 border-gray-200"
-                  }
-                >
+                <Badge className={getStatusColor(assignment.status)}>
                   {assignment.status}
                 </Badge>
                 <Badge variant="outline">
-                  {assignment.difficulty.toUpperCase()}
+                  {assignment.difficulty}
                 </Badge>
                 <div className="flex items-center text-sm text-gray-600">
                   <Clock className="h-4 w-4 mr-1" />

@@ -18,6 +18,7 @@ import {
   generateAssignment,
 } from "../../lib/api.service";
 import { formatDistanceToNow, format } from "date-fns";
+import { getStatusColor } from "../../lib/utils";
 
 interface ApplicationDrawerProps {
   application: Application;
@@ -25,22 +26,13 @@ interface ApplicationDrawerProps {
   onUpdate?: () => void;
 }
 
-const statusStyles: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  invited: "bg-blue-100 text-blue-800 border-blue-200",
-  completed: "bg-purple-100 text-purple-800 border-purple-200",
-  reviewed: "bg-indigo-100 text-indigo-800 border-indigo-200",
-  accepted: "bg-green-100 text-green-800 border-green-200",
-  rejected: "bg-red-100 text-red-800 border-red-200",
-};
-
 const statusLabels: Record<string, string> = {
-  pending: "Pending Review",
-  invited: "Assignment Sent",
-  completed: "Assignment Completed",
-  reviewed: "Under Review",
-  accepted: "Accepted",
-  rejected: "Rejected",
+  pending: "pending",
+  invited: "invited",
+  completed: "completed",
+  reviewed: "reviewed",
+  accepted: "accepted",
+  rejected: "rejected",
 };
 
 export const ApplicationDrawer: React.FC<ApplicationDrawerProps> = ({
@@ -106,14 +98,9 @@ export const ApplicationDrawer: React.FC<ApplicationDrawerProps> = ({
                   {application.user_name || "Unknown Candidate"}
                 </h2>
                 <Badge
-                  className={`${
-                    statusStyles[application.status] ||
-                    "bg-gray-100 text-gray-800"
-                  } border`}
+                  className={`${getStatusColor(application.status)} border`}
                 >
-                  {(
-                    statusLabels[application.status] || application.status
-                  ).toUpperCase()}
+                  {statusLabels[application.status] || application.status}
                 </Badge>
               </div>
 
