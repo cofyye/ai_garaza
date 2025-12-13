@@ -101,7 +101,7 @@ export const JobDetailPage = () => {
                   {job.title}
                 </h1>
                 <Badge className={getStatusColor(job.status)}>
-                  {job.status.toUpperCase()}
+                  {job.status}
                 </Badge>
               </div>
 
