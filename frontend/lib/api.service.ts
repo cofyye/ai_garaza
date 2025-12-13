@@ -1,7 +1,7 @@
 /**
  * API Service - komunikacija sa FastAPI backendom
  */
-import { Job, JobCreate, JobUpdate, JobStatus } from "./types";
+import { Job, JobCreate, JobUpdate, JobStatus, User } from "./types";
 
 const API_BASE_URL = "/api";
 
@@ -294,6 +294,34 @@ export async function getAssignmentById(
     ...assignment,
     id: assignment._id || assignment.id,
   };
+}
+
+// ============ Users API ============
+
+export interface GetUsersParams {
+  skip?: number;
+  limit?: number;
+}
+
+/**
+ * Dohvati sve korisnike (kandidate)
+ */
+export async function getUsers(params?: GetUsersParams): Promise<User[]> {
+  const searchParams = new URLSearchParams();
+
+  if (params?.skip !== undefined) searchParams.set("skip", String(params.skip));
+  if (params?.limit !== undefined)
+    searchParams.set("limit", String(params.limit));
+
+  const query = searchParams.toString();
+  const endpoint = query ? `/users/?${query}` : "/users/";
+
+  const users = await fetchApi<any[]>(endpoint);
+
+  return users.map((user) => ({
+    ...user,
+    id: user._id || user.id,
+  }));
 }
 
 // ============ Future APIs (placeholder) ============

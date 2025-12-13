@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Modal, Button, Input } from "../common/ui-primitives";
-import { Job, JobPost, Client } from "../../lib/types";
-import { Copy, Send, Mail } from "lucide-react";
-import { MOCK_CLIENTS } from "../../lib/mock-data";
+import { Job, JobPost, Client, User } from "../../lib/types";
+import { Copy, Send, Mail, Loader2 } from "lucide-react";
+import { getUsers } from "../../lib/api.service";
 
 interface GenerateLinkModalProps {
   isOpen: boolean;
@@ -16,11 +16,13 @@ export const GenerateLinkModal = ({ isOpen, onClose, preselectedJob, preselected
   const [selectedClientId, setSelectedClientId] = useState<string>(preselectedClient?.id || "");
   const [generatedLink, setGeneratedLink] = useState("");
   const [copied, setCopied] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
   // Get selected client data to display email
   const selectedClientData = useMemo(() => 
-    MOCK_CLIENTS.find(c => c.id === selectedClientId), 
-  [selectedClientId]);
+    users.find(c => c.id === selectedClientId), 
+  [selectedClientId, users]);
 
   useEffect(() => {
     if (isOpen) {
@@ -29,8 +31,22 @@ export const GenerateLinkModal = ({ isOpen, onClose, preselectedJob, preselected
         if (preselectedJob) setSelectedJobId(preselectedJob.id);
         if (preselectedClient) setSelectedClientId(preselectedClient.id);
         else setSelectedClientId(""); // Reset if reopening
+        
+        fetchUsers();
     }
   }, [isOpen, preselectedJob, preselectedClient]);
+
+  const fetchUsers = async () => {
+    setIsLoadingUsers(true);
+    try {
+      const data = await getUsers();
+      setUsers(data);
+    } catch (error) {
+      console.error("Failed to fetch users", error);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
 
   const handleGenerate = () => {
     const mockToken = Math.random().toString(36).substring(7);
@@ -46,32 +62,33 @@ export const GenerateLinkModal = ({ isOpen, onClose, preselectedJob, preselected
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Generate Interview Link">
-      <div className="space-y-6">
+      <div className="space-y-5">
         {/* Client Selection */}
         {!preselectedClient && (
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Select Candidate</label>
-            <select 
-              className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400 transition-all"
-              value={selectedClientId}
-              onChange={(e) => setSelectedClientId(e.target.value)}
-            >
-              <option value="" className="text-gray-500">Choose a candidate...</option>
-              {MOCK_CLIENTS.map(c => <option key={c.id} value={c.id} className="text-gray-900">{c.name}</option>)}
-            </select>
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-gray-900 uppercase tracking-wide">Select Candidate</label>
+            {isLoadingUsers ? (
+              <div className="flex items-center gap-2 text-sm text-gray-500 py-2">
+                <Loader2 className="h-4 w-4 animate-spin" /> Loading candidates...
+              </div>
+            ) : (
+              <select 
+                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all"
+                value={selectedClientId}
+                onChange={(e) => setSelectedClientId(e.target.value)}
+              >
+                <option value="" className="text-gray-500">Choose a candidate...</option>
+                {users.map(c => <option key={c.id} value={c.id} className="text-gray-900">{c.full_name}</option>)}
+              </select>
+            )}
           </div>
         )}
 
-        {/* Selected Client Email Display */}
+        {/* Selected Client Email Display - Compact */}
         {(selectedClientData || preselectedClient) && (
-            <div className="rounded-md bg-gray-50 p-3 flex items-center gap-3 border border-gray-200">
-                <div className="bg-white p-1.5 rounded-full text-gray-900">
-                    <Mail className="h-4 w-4" />
-                </div>
-                <div>
-                    <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">Candidate Email</div>
-                    <div className="text-sm font-medium text-gray-900">{selectedClientData?.email || preselectedClient?.email}</div>
-                </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
+                <Mail className="h-3.5 w-3.5 text-gray-400" />
+                <span className="font-medium text-gray-900">{selectedClientData?.email || preselectedClient?.email}</span>
             </div>
         )}
 
@@ -79,53 +96,44 @@ export const GenerateLinkModal = ({ isOpen, onClose, preselectedJob, preselected
           <Button 
             onClick={handleGenerate} 
             disabled={!selectedClientId && !preselectedClient} 
-            className="w-full h-11 mt-2"
+            className="w-full h-10 mt-2 bg-black text-white hover:bg-gray-800"
           >
-            Generate Interview Link
+            Generate Link
           </Button>
         ) : (
-          <div className="animate-in fade-in slide-in-from-bottom-2 space-y-6 duration-300">
+          <div className="animate-in fade-in slide-in-from-bottom-2 space-y-5 duration-300">
             {/* Link Result */}
-            <div>
-               <label className="block text-sm font-medium text-gray-700 mb-1">Interview URL</label>
+            <div className="space-y-1.5">
+               <label className="block text-xs font-semibold text-gray-900 uppercase tracking-wide">Interview URL</label>
                <div className="flex gap-2">
-                 <Input readOnly value={generatedLink} className="bg-gray-50 font-mono text-xs text-gray-900" />
-                 <Button variant="outline" onClick={handleCopy} className="shrink-0">
-                   {copied ? "Copied" : <Copy className="h-4 w-4" />}
+                 <Input readOnly value={generatedLink} className="bg-gray-50 font-mono text-xs text-gray-900 h-9" />
+                 <Button variant="outline" onClick={handleCopy} className="shrink-0 h-9 w-9 p-0 flex items-center justify-center">
+                   {copied ? <span className="text-xs font-bold">✓</span> : <Copy className="h-3.5 w-3.5" />}
                  </Button>
                </div>
             </div>
 
-            {/* Email Section */}
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-              <h4 className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-4">
-                <Send className="h-4 w-4 text-gray-900" /> Send Invitation via Gmail
-              </h4>
-              
+            {/* Email Section - Simplified */}
+            <div className="pt-4 border-t border-gray-100">
               <div className="space-y-3">
-                 <div>
-                    <label className="text-xs font-medium text-gray-500 mb-1 block">To</label>
-                    <Input value={selectedClientData?.email || preselectedClient?.email || ""} readOnly disabled className="bg-white text-gray-700" />
-                 </div>
-                 
-                 <div>
-                    <label className="text-xs font-medium text-gray-500 mb-1 block">Message</label>
+                 <div className="space-y-1.5">
+                    <label className="block text-xs font-semibold text-gray-900 uppercase tracking-wide">Message Preview</label>
                     <textarea 
-                        className="w-full rounded-md border border-gray-300 bg-white p-3 text-sm text-gray-900 h-32 focus:outline-none focus:ring-2 focus:ring-black resize-none"
-                        defaultValue={`Hi ${selectedClientData?.name.split(' ')[0] || 'there'},\n\nWe're excited to move forward! Please use the following link to start your technical interview:\n\n${generatedLink}\n\nPlease note this link is valid for 48 hours.\n\nBest,\nTalentAI Team`}
+                        className="w-full rounded-lg border border-gray-200 bg-white p-3 text-sm text-gray-600 h-24 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black resize-none leading-relaxed"
+                        defaultValue={`Hi ${selectedClientData?.full_name.split(' ')[0] || 'there'},\n\nWe're excited to move forward! Please use the following link to start your technical interview:\n\n${generatedLink}`}
                     />
                  </div>
 
                  <div className="flex justify-end gap-2 pt-2">
-                    <Button variant="ghost" onClick={onClose} size="sm">Cancel</Button>
+                    <Button variant="ghost" onClick={onClose} size="sm" className="h-9">Cancel</Button>
                     <Button 
-                        className="gap-2 bg-black hover:bg-gray-800 text-white" 
+                        className="gap-2 bg-black hover:bg-gray-800 text-white h-9 px-4" 
                         onClick={() => {
                             alert(`Email sent to ${selectedClientData?.email || 'candidate'}!`);
                             onClose();
                         }}
                     >
-                        <Send className="h-4 w-4" /> Send Email
+                        <Send className="h-3.5 w-3.5" /> Send Invitation
                     </Button>
                  </div>
               </div>

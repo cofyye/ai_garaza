@@ -159,6 +159,22 @@ export interface ApplicationUpdate {
   notes?: string;
 }
 
+// ============ User Types ============
+export interface User {
+  id: string;
+  email: string;
+  full_name: string;
+  phone?: string;
+  location?: string;
+  linkedin_url?: string;
+  github_url?: string;
+  portfolio_url?: string;
+  resume_url?: string;
+  bio?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 // ============ Assignment Types ============
 export type AssignmentDifficulty = "easy" | "mid" | "hard";
 export type AssignmentStatus =
