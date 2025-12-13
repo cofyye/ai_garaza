@@ -1,4 +1,4 @@
-import { Client, ClientFiltersState, JobPost, JobFiltersState } from "./types";
+import { Client, ClientFiltersState, Job, JobPost, JobFiltersState } from "./types";
 
 export function filterClients(clients: Client[], filters: ClientFiltersState): Client[] {
   return clients.filter((client) => {
@@ -34,7 +34,18 @@ export function filterClients(clients: Client[], filters: ClientFiltersState): C
   });
 }
 
-export function filterJobs(jobs: JobPost[], filters: JobFiltersState): JobPost[] {
+// Filter for new Job type (from backend API)
+export function filterJobsApi(jobs: Job[], filters: JobFiltersState): Job[] {
+  return jobs.filter((job) => {
+    const searchMatch = job.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+                       job.company.toLowerCase().includes(filters.search.toLowerCase());
+    const statusMatch = filters.status === "ALL" || job.status === filters.status;
+    return searchMatch && statusMatch;
+  });
+}
+
+// Legacy filter for JobPost (mock data) - kept for backwards compatibility
+export function filterJobs(jobs: JobPost[], filters: { search: string; status: string }): JobPost[] {
   return jobs.filter((job) => {
     const searchMatch = job.title.toLowerCase().includes(filters.search.toLowerCase());
     const statusMatch = filters.status === "ALL" || job.status === filters.status;

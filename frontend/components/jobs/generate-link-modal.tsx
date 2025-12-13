@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Modal, Button, Input } from "../common/ui-primitives";
-import { JobPost, Client } from "../../lib/types";
+import { Job, JobPost, Client } from "../../lib/types";
 import { Copy, Send, Mail } from "lucide-react";
 import { MOCK_CLIENTS } from "../../lib/mock-data";
 
 interface GenerateLinkModalProps {
   isOpen: boolean;
   onClose: () => void;
-  preselectedJob?: JobPost | null;
+  preselectedJob?: Job | JobPost | null;
   preselectedClient?: Client | null;
 }
 

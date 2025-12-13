@@ -1,0 +1,138 @@
+/**
+ * API Service - komunikacija sa FastAPI backendom
+ */
+import { Job, JobCreate, JobUpdate, JobStatus } from "./types";
+
+const API_BASE_URL = "/api";
+
+/**
+ * Generic fetch wrapper sa error handling-om
+ */
+async function fetchApi<T>(
+  endpoint: string,
+  options?: RequestInit
+): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint}`;
+  
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+    ...options,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+// ============ Jobs API ============
+
+export interface GetJobsParams {
+  skip?: number;
+  limit?: number;
+  status?: JobStatus;
+  location_type?: string;
+  experience_level?: string;
+}
+
+/**
+ * Dohvati sve poslove sa opcionalnim filterima
+ */
+export async function getJobs(params?: GetJobsParams): Promise<Job[]> {
+  const searchParams = new URLSearchParams();
+  
+  if (params?.skip !== undefined) searchParams.set("skip", String(params.skip));
+  if (params?.limit !== undefined) searchParams.set("limit", String(params.limit));
+  if (params?.status) searchParams.set("status", params.status);
+  if (params?.location_type) searchParams.set("location_type", params.location_type);
+  if (params?.experience_level) searchParams.set("experience_level", params.experience_level);
+
+  const query = searchParams.toString();
+  const endpoint = query ? `/jobs/?${query}` : "/jobs/";
+  
+  const jobs = await fetchApi<any[]>(endpoint);
+  
+  // Map _id to id for frontend compatibility
+  return jobs.map(job => ({
+    ...job,
+    id: job._id || job.id,
+  }));
+}
+
+/**
+ * Dohvati jedan posao po ID-u
+ */
+export async function getJobById(jobId: string): Promise<Job> {
+  const job = await fetchApi<any>(`/jobs/${jobId}`);
+  return {
+    ...job,
+    id: job._id || job.id,
+  };
+}
+
+/**
+ * Pretraži poslove po ključnoj reči
+ */
+export async function searchJobs(query: string, limit: number = 20): Promise<Job[]> {
+  const searchParams = new URLSearchParams({
+    q: query,
+    limit: String(limit),
+  });
+  
+  const jobs = await fetchApi<any[]>(`/jobs/search?${searchParams}`);
+  
+  return jobs.map(job => ({
+    ...job,
+    id: job._id || job.id,
+  }));
+}
+
+/**
+ * Kreiraj novi posao
+ */
+export async function createJob(job: JobCreate): Promise<Job> {
+  const created = await fetchApi<any>("/jobs/", {
+    method: "POST",
+    body: JSON.stringify(job),
+  });
+  
+  return {
+    ...created,
+    id: created._id || created.id,
+  };
+}
+
+/**
+ * Ažuriraj posao
+ */
+export async function updateJob(jobId: string, job: JobUpdate): Promise<Job> {
+  const updated = await fetchApi<any>(`/jobs/${jobId}`, {
+    method: "PUT",
+    body: JSON.stringify(job),
+  });
+  
+  return {
+    ...updated,
+    id: updated._id || updated.id,
+  };
+}
+
+/**
+ * Obriši posao
+ */
+export async function deleteJob(jobId: string): Promise<void> {
+  await fetchApi(`/jobs/${jobId}`, {
+    method: "DELETE",
+  });
+}
+
+// ============ Future APIs (placeholder) ============
+
+// Clients API će biti dodat kasnije kada backend podrži
+// export async function getClients() { ... }
+// export async function getClientById(id: string) { ... }
