@@ -1,201 +1,146 @@
 """
 Assignment service - Business logic for technical assignments.
-Includes mock AI agent for task generation.
+Includes AI agent for task generation using LangChain.
 """
 from datetime import datetime, timedelta
 from typing import Optional
+import json
 
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from pydantic import BaseModel, Field
 
-from schemas.assignment import AssignmentCreate, AssignmentDifficulty, AssignmentInDB, AssignmentStatus, AssignmentUpdate
+from schemas.assignment import AssignmentCreate, AssignmentInDB, AssignmentStatus, AssignmentUpdate
+from core.config import settings
 
 
-class MockAIAgent:
+class GeneratedTask(BaseModel):
+    """Structured output model for AI-generated tasks."""
+    task_title: str = Field(description="Clear, concise task title")
+    task_description: str = Field(description="Detailed task description with context, requirements, and time estimate")
+    task_requirements: list[str] = Field(description="List of specific requirements - as many as needed for the task")
+    evaluation_criteria: list[str] = Field(description="List of evaluation criteria - as many as needed to properly assess the work")
+    additional_resources: Optional[str] = Field(None, description="Optional hints, documentation links, or tech stack notes")
+
+
+class AITaskGenerator:
     """
-    Mock AI Agent for generating technical assignments.
-    Later will be replaced with real LangGraph agent.
+    AI-powered task generator using LangChain and OpenAI.
+    Generates practical, verifiable technical assignments (30-60 min).
     """
     
-    @staticmethod
-    def generate_task(job_title: str, tech_stack: list[str], difficulty: AssignmentDifficulty) -> dict:
-        """Generate a realistic technical task based on job requirements."""
+    def __init__(self, openai_api_key: Optional[str] = None):
+        """Initialize AI task generator with LLM and structured output."""
+        api_key = openai_api_key or settings.OPENAI_API_KEY
         
-        # Mock task templates based on difficulty
-        tasks = {
-            AssignmentDifficulty.JUNIOR: {
-                "title": f"Build a Simple {tech_stack[0] if tech_stack else 'Web'} Application",
-                "description": f"""
-Create a basic application using {', '.join(tech_stack[:3]) if tech_stack else 'modern tech stack'}.
+        if not api_key:
+            raise ValueError(
+                "OPENAI_API_KEY is required for AI task generation. "
+                "Please set it in your .env file or pass it as a parameter."
+            )
+        
+        # Use structured output with Pydantic model
+        self.llm = ChatOpenAI(
+            model="gpt-5",
+            temperature=1, 
+            api_key=api_key
+        ).with_structured_output(GeneratedTask)
+        
+        # System prompt for task generation
+        self.system_prompt = """You are an expert technical interviewer and software architect designing practical coding assignments.
 
-**Objective:**
-Build a small {job_title.lower()} project that demonstrates your understanding of core concepts.
+**YOUR MISSION:**
+Generate a realistic, verifiable technical coding task that can be completed in 30-60 minutes during a live technical interview.
 
-**Requirements:**
-- Implement basic CRUD operations
-- Clean, readable code with comments
-- Simple error handling
-- README with setup instructions
+**CRITICAL REQUIREMENTS:**
+1. **Practicality**: Task must be something they can actually code and run in a console/editor
+2. **Verifiable**: Output should be clearly testable (prints to console, returns values, runs commands)
+3. **Appropriate Scope**: 30-60 minutes max - NOT a multi-hour project
+4. **Position-Specific**: Tailor to the exact role (frontend/backend/fullstack/data)
+5. **Seniority-Appropriate**: Match complexity to experience level
+6. **Real Problem**: Solve something realistic, not academic puzzles
 
-**What we're looking for:**
-- Code organization
-- Basic understanding of the tech stack
-- Ability to follow requirements
-                """.strip(),
-                "requirements": [
-                    "Functional application with basic features",
-                    "Clean code structure",
-                    "Basic error handling",
-                    "Documentation in README"
-                ],
-                "evaluation": [
-                    "Code quality and organization",
-                    "Functionality completeness",
-                    "Documentation quality",
-                    "Following best practices"
-                ]
-            },
-            AssignmentDifficulty.MID: {
-                "title": f"Design and Implement a {job_title} Feature",
-                "description": f"""
-Design and build a production-ready feature using {', '.join(tech_stack[:3]) if tech_stack else 'your tech stack'}.
+**WHAT TO AVOID:**
+- Large architectural tasks requiring multiple files/services
+- Tasks requiring deployment, Docker, CI/CD setup
+- Extensive boilerplate or project scaffolding
+- Database schema design without implementation
+- Vague "design a system" questions without coding
 
-**Objective:**
-Create a realistic feature that solves a real-world problem, demonstrating your mid-level engineering skills.
+**WHAT TO INCLUDE:**
+- Clear, focused problem statement
+- Specific input/output examples
+- Core functionality that demonstrates skill
+- Edge cases to handle
+- Success criteria
 
-**Requirements:**
-- RESTful API design (or equivalent for your role)
-- Database schema design
-- Error handling and validation
-- Unit tests (at least 70% coverage)
-- API documentation
-- Docker setup (optional but preferred)
+**TASK STRUCTURE:**
+- Generate as many requirements as needed for the task (typically 3-7)
+- Generate as many evaluation criteria as needed (typically 3-6)
+- Be specific and actionable - avoid generic statements
+- Adapt complexity to the candidate's experience level
 
-**What we're looking for:**
-- System design thinking
-- Code quality and maintainability
-- Testing approach
-- Production-ready mindset
-                """.strip(),
-                "requirements": [
-                    "Well-designed API/feature architecture",
-                    "Proper error handling and validation",
-                    "Unit tests with good coverage",
-                    "Clear documentation",
-                    "Database schema (if applicable)"
-                ],
-                "evaluation": [
-                    "System design and architecture",
-                    "Code quality and patterns",
-                    "Test coverage and quality",
-                    "Documentation completeness",
-                    "Scalability considerations"
-                ]
-            },
-            AssignmentDifficulty.SENIOR: {
-                "title": f"Architect a Scalable {job_title} Solution",
-                "description": f"""
-Design and implement a scalable, production-grade system using {', '.join(tech_stack) if tech_stack else 'modern architecture'}.
+**EXAMPLES OF GOOD TASKS:**
+- "Build a rate limiter function that tracks requests per IP"
+- "Implement autocomplete with debouncing"
+- "Create a CLI tool that parses log files and shows statistics"
+- "Build a simple todo list with filters"
+- "Write a function to detect cycles in a dependency graph\""""
+        
+        self.prompt_template = ChatPromptTemplate.from_messages([
+            ("system", self.system_prompt),
+            ("human", """Generate a technical coding task for this position:
 
-**Objective:**
-Build a sophisticated system that demonstrates senior-level engineering: architecture, scalability, monitoring, and operational excellence.
+**Job Title:** {job_title}
+**Tech Stack:** {tech_stack}
+**Experience Level:** {experience_level}
 
-**Requirements:**
-- Microservices or modular architecture
-- Database design with scaling in mind
-- Comprehensive error handling and logging
-- Extensive test coverage (unit + integration)
-- API documentation (OpenAPI/Swagger)
-- Docker + docker-compose setup
-- CI/CD configuration
-- Monitoring and observability considerations
-- Security best practices
+{custom_instructions}
 
-**What we're looking for:**
-- Architectural thinking and trade-offs
-- Production-ready, enterprise-grade code
-- Scalability and performance considerations
-- Comprehensive testing strategy
-- DevOps and operational awareness
-                """.strip(),
-                "requirements": [
-                    "Scalable architecture design",
-                    "Production-ready code with all best practices",
-                    "Comprehensive testing (unit, integration, e2e)",
-                    "Full API documentation",
-                    "Docker containerization",
-                    "CI/CD pipeline configuration",
-                    "Monitoring/logging setup",
-                    "Security considerations documented"
-                ],
-                "evaluation": [
-                    "Architectural design and scalability",
-                    "Code quality and enterprise patterns",
-                    "Testing strategy and coverage",
-                    "DevOps and operational readiness",
-                    "Documentation and communication",
-                    "Performance optimization",
-                    "Security implementation"
-                ]
-            },
-            AssignmentDifficulty.LEAD: {
-                "title": f"Technical Leadership Challenge: {job_title} System",
-                "description": f"""
-Design a complete system architecture and lead its implementation using {', '.join(tech_stack) if tech_stack else 'enterprise tech stack'}.
-
-**Objective:**
-Demonstrate technical leadership: architecture design, team collaboration, technical decision-making, and system ownership.
-
-**Requirements:**
-- Complete system architecture document (diagrams, trade-offs, scalability)
-- Multi-service implementation with clear boundaries
-- Infrastructure as Code (IaC)
-- Comprehensive testing strategy
-- API design and documentation
-- Deployment strategy (Kubernetes/cloud-native)
-- Monitoring, alerting, and observability
-- Technical documentation for team
-- Code review guidelines
-
-**What we're looking for:**
-- Systems thinking and architecture
-- Technical decision-making and trade-offs documentation
-- Leadership through code and documentation
-- Operational excellence
-- Team-oriented solutions
-                """.strip(),
-                "requirements": [
-                    "System architecture document with diagrams",
-                    "Multi-service implementation",
-                    "Infrastructure as Code setup",
-                    "Complete testing strategy",
-                    "API design documentation",
-                    "Deployment and scaling strategy",
-                    "Monitoring and alerting setup",
-                    "Technical documentation for team",
-                    "Trade-offs and decision log"
-                ],
-                "evaluation": [
-                    "System architecture and design thinking",
-                    "Technical leadership and decision-making",
-                    "Code quality and best practices",
-                    "Operational excellence",
-                    "Documentation and communication",
-                    "Team collaboration approach",
-                    "Scalability and performance design"
-                ]
-            }
+Generate a practical, focused task that can be completed in 30-60 minutes. Tailor the complexity and expectations to the experience level.""")
+        ])
+    
+    def generate_task(
+        self,
+        job_title: str,
+        tech_stack: list[str],
+        experience_level: str,
+        custom_requirements: Optional[str] = None
+    ) -> dict:
+        """
+        Generate technical task using AI with structured output.
+        This is a core product feature - AI generation is required.
+        """
+        # Build custom instructions
+        custom_instructions = ""
+        if custom_requirements:
+            custom_instructions = f"\n**CUSTOM REQUIREMENTS FROM INTERVIEWER:**\n{custom_requirements}\n\nPrioritize these requirements while maintaining 30-60 min scope."
+        
+        # Add experience-level specific guidance
+        experience_guidance = {
+            "intern": "Intern/Entry level: Focus on fundamentals, basic implementations, very clear instructions. Avoid complex algorithms.",
+            "junior": "Junior level: Focus on fundamentals, basic implementations, clear instructions. Avoid complex algorithms.",
+            "mid": "Mid level: Expect solid implementation, error handling, edge cases, some optimization.",
+            "senior": "Senior level: Expect production-quality code, performance considerations, design patterns, extensibility.",
+            "lead": "Lead level: Expect architectural thinking, trade-off decisions, scalability, maintainability, documentation.",
+            "staff": "Staff level: Expect architectural thinking, trade-off decisions, scalability, maintainability, documentation."
         }
+        custom_instructions += f"\n\n**EXPERIENCE LEVEL GUIDANCE:** {experience_guidance.get(experience_level.lower(), experience_guidance['mid'])}"
         
-        task_template = tasks.get(difficulty, tasks[AssignmentDifficulty.MID])
+        # Generate with AI - returns GeneratedTask Pydantic model
+        chain = self.prompt_template | self.llm
+        result: GeneratedTask = chain.invoke({
+            "job_title": job_title,
+            "tech_stack": ", ".join(tech_stack) if tech_stack else "Any modern stack",
+            "experience_level": experience_level,
+            "custom_instructions": custom_instructions
+        })
         
-        return {
-            "task_title": task_template["title"],
-            "task_description": task_template["description"],
-            "task_requirements": task_template["requirements"],
-            "evaluation_criteria": task_template["evaluation"],
-            "additional_resources": f"Use {', '.join(tech_stack)} and refer to official documentation for best practices." if tech_stack else None
-        }
+        # Convert to dict for database storage
+        return result.model_dump()
+
 
 
 class AssignmentService:
@@ -206,12 +151,13 @@ class AssignmentService:
         self.applications_collection = db["applications"]
         self.jobs_collection = db["jobs"]
         self.users_collection = db["users"]
-        self.ai_agent = MockAIAgent()
+        self.ai_generator = AITaskGenerator()
     
     async def generate_and_create_assignment(
         self, 
         application_id: str,
-        auto_send: bool = False
+        auto_send: bool = False,
+        custom_requirements: Optional[str] = None
     ) -> AssignmentInDB:
         """
         Generate a technical assignment for an application using AI agent.
@@ -230,32 +176,23 @@ class AssignmentService:
         if not job:
             raise ValueError("Job not found")
         
-        # Determine difficulty based on job experience level
-        difficulty_mapping = {
-            "intern": AssignmentDifficulty.JUNIOR,
-            "junior": AssignmentDifficulty.JUNIOR,
-            "mid": AssignmentDifficulty.MID,
-            "senior": AssignmentDifficulty.SENIOR,
-            "lead": AssignmentDifficulty.LEAD,
-            "staff": AssignmentDifficulty.LEAD
-        }
-        difficulty = difficulty_mapping.get(job.get("experience_level", "mid"), AssignmentDifficulty.MID)
+        # Get experience level from job
+        experience_level = job.get("experience_level", "mid")
         
-        # Generate task using AI agent
-        generated_task = self.ai_agent.generate_task(
+        generated_task = self.ai_generator.generate_task(
             job_title=job.get("title", "Developer"),
             tech_stack=job.get("tech_stack", []),
-            difficulty=difficulty
+            experience_level=experience_level,
+            custom_requirements=custom_requirements
         )
         
         # Generate unique session ID
         import secrets
         session_id = secrets.token_urlsafe(32)
         
-        # Create assignment
+        # Create assignment - no difficulty field for task itself
         assignment_data = {
             "application_id": application_id,
-            "difficulty": difficulty,
             "time_limit_hours": 72,  # Default 72 hours
             **generated_task,
             "status": AssignmentStatus.PENDING,

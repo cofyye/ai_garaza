@@ -63,13 +63,10 @@ export const ApplicationDrawer: React.FC<ApplicationDrawerProps> = ({
   };
 
   const handleGenerateAssignment = async () => {
-    if (!confirm("Generate and send technical assignment to this candidate?"))
-      return;
-
     setIsGenerating(true);
     setError(null);
     try {
-      await generateAssignment(application.id, 72);
+      await generateAssignment(application.id);
       await loadAssignment();
       if (onUpdate) onUpdate();
     } catch (err) {
@@ -150,12 +147,6 @@ export const ApplicationDrawer: React.FC<ApplicationDrawerProps> = ({
                     <h4 className="font-semibold text-gray-900 text-lg">
                       {assignment.task_title}
                     </h4>
-                    <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
-                      <span className="font-medium">Difficulty:</span>
-                      <span className="capitalize px-2 py-0.5 bg-white rounded border border-blue-100 text-xs">
-                        {assignment.difficulty}
-                      </span>
-                    </p>
                   </div>
                   <Badge
                     className={

@@ -11,7 +11,7 @@ export const InterviewHeader = ({ onToggleTask }: InterviewHeaderProps) => {
     <header className="h-20 bg-gray-100 flex items-center justify-between px-6 shrink-0 z-10">
       <div className="flex items-center">
         <Cpu className="mr-2 h-8 w-8 text-black" />
-        <span className="text-xl font-bold text-black">EngVal.AI</span>
+        <span className="text-xl font-bold text-black">Engval.ai</span>
       </div>
 
       <div className="flex items-center gap-4">

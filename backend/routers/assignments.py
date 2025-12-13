@@ -1,7 +1,9 @@
 """
 Assignment API endpoints.
 """
-from fastapi import APIRouter, Depends, HTTPException
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, Body
+from pydantic import BaseModel
 
 from dependencies.database import get_db
 from schemas.assignment import AssignmentInDB, AssignmentUpdate
@@ -15,10 +17,16 @@ def get_assignment_service(db=Depends(get_db)) -> AssignmentService:
     return AssignmentService(db)
 
 
+class GenerateAssignmentRequest(BaseModel):
+    """Request body for generating assignment."""
+    auto_send: bool = False
+    custom_requirements: Optional[str] = None
+
+
 @router.post("/generate/{application_id}", response_model=AssignmentInDB, status_code=201)
 async def generate_assignment(
     application_id: str,
-    auto_send: bool = False,
+    request: GenerateAssignmentRequest,
     service: AssignmentService = Depends(get_assignment_service)
 ):
     """
@@ -26,11 +34,13 @@ async def generate_assignment(
     
     - **application_id**: ID of the application
     - **auto_send**: If true, send invitation email immediately
+    - **custom_requirements**: Optional custom instructions for the AI agent
     """
     try:
         assignment = await service.generate_and_create_assignment(
             application_id=application_id,
-            auto_send=auto_send
+            auto_send=request.auto_send,
+            custom_requirements=request.custom_requirements
         )
         return assignment
     except ValueError as e:

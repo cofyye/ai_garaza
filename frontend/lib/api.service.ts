@@ -244,18 +244,23 @@ export async function deleteApplication(applicationId: string): Promise<void> {
  */
 export async function generateAssignment(
   applicationId: string,
-  deadlineHours: number = 72
-): Promise<Application> {
-  const updated = await fetchApi<any>(
-    `/applications/${applicationId}/generate-assignment?deadline_hours=${deadlineHours}`,
+  customRequirements?: string,
+  autoSend: boolean = true
+): Promise<any> {
+  const assignment = await fetchApi<any>(
+    `/assignments/generate/${applicationId}`,
     {
       method: "POST",
+      body: JSON.stringify({
+        auto_send: autoSend,
+        custom_requirements: customRequirements || null,
+      }),
     }
   );
 
   return {
-    ...updated,
-    id: updated._id || updated.id,
+    ...assignment,
+    id: assignment._id || assignment.id,
   };
 }
 

@@ -33,7 +33,6 @@ class AssignmentBase(BaseModel):
     task_description: str = Field(..., description="Full task description")
     task_requirements: list[str] = Field(default_factory=list, description="Task requirements")
     evaluation_criteria: list[str] = Field(default_factory=list, description="How it will be evaluated")
-    difficulty: AssignmentDifficulty
     time_limit_hours: int = Field(72, description="Time limit in hours (default 72h)")
     additional_resources: Optional[str] = Field(None, description="Links or resources for task")
 
@@ -89,7 +88,6 @@ class AssignmentInDB(AssignmentBase):
                 "application_id": "507f1f77bcf86cd799439012",
                 "task_title": "Build a REST API for Task Management",
                 "task_description": "Create a FastAPI application...",
-                "difficulty": "mid",
                 "status": "sent",
                 "time_limit_hours": 72,
                 "created_at": "2024-01-01T00:00:00",

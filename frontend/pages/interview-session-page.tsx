@@ -147,9 +147,7 @@ export const InterviewSessionPage = () => {
                 <Badge className={getStatusColor(assignment.status)}>
                   {assignment.status}
                 </Badge>
-                <Badge variant="outline">
-                  {assignment.difficulty}
-                </Badge>
+                <Badge variant="outline"></Badge>
                 <div className="flex items-center text-sm text-gray-600">
                   <Clock className="h-4 w-4 mr-1" />
                   {assignment.time_limit_hours}h time limit

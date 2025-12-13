@@ -167,7 +167,6 @@ export interface User {
 }
 
 // ============ Assignment Types ============
-export type AssignmentDifficulty = "easy" | "mid" | "hard";
 export type AssignmentStatus =
   | "pending"
   | "sent"
@@ -182,7 +181,6 @@ export interface Assignment {
   task_description: string;
   task_requirements: string[];
   evaluation_criteria: string[];
-  difficulty: AssignmentDifficulty;
   time_limit_hours: number;
   additional_resources?: string;
   status: AssignmentStatus;

@@ -67,15 +67,15 @@ export const ClientDetailPage = () => {
   }, [id]);
 
   const handleGenerateAssignment = async () => {
-    if (
-      !application ||
-      !confirm("Generate and send technical assignment to this candidate?")
-    )
-      return;
+    if (!application) return;
 
     setIsGenerating(true);
     try {
-      await generateAssignment(application.id, 72);
+      await generateAssignment(
+        application.id,
+        customRequirements || undefined,
+        true
+      );
       const assignData = await getAssignmentByApplication(application.id);
       setAssignment(assignData);
     } catch (err) {
@@ -174,12 +174,6 @@ export const ClientDetailPage = () => {
                       <h4 className="font-semibold text-gray-900 text-lg">
                         {assignment.task_title}
                       </h4>
-                      <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
-                        <span className="font-medium">Difficulty:</span>
-                        <span className="capitalize px-2 py-0.5 bg-gray-100 rounded text-xs">
-                          {assignment.difficulty}
-                        </span>
-                      </p>
                     </div>
                     <Badge
                       className={
