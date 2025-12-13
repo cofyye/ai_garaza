@@ -23,11 +23,18 @@ class Settings(BaseSettings):
     
     # AI/LLM Config (add as needed)
     OPENAI_API_KEY: str | None = None
+    GEMINI_API_KEY: str | None = None
+    GOOGLE_API_KEY: str | None = None
+    ELEVENLABS_API_KEY: str | None = None
+    
+    # CORS / Frontend Config
+    FRONTEND_URL: str = "http://localhost:3000"
     
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
-        case_sensitive=True
+        case_sensitive=True,
+        extra="ignore"  # Ignore extra env vars not defined in Settings
     )
 
 
