@@ -5,6 +5,7 @@ import { Topbar } from "./components/layout/topbar";
 import { ApplicationsPage } from "./pages/applications-page";
 import { JobsPage } from "./pages/jobs-page";
 import { JobDetailPage } from "./pages/job-detail-page";
+import { ClientDetailPage } from "./pages/client-detail-page";
 import { AnalyticsPage } from "./pages/analytics-page";
 
 const AppLayout = ({ children }: { children?: React.ReactNode }) => {
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="/applications" element={<ApplicationsPage />} />
           <Route path="/jobs" element={<JobsPage />} />
           <Route path="/jobs/:id" element={<JobDetailPage />} />
+          <Route path="/applications/:id" element={<ClientDetailPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="*" element={<Navigate to="/jobs" replace />} />
         </Routes>

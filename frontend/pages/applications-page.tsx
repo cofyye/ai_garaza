@@ -1,19 +1,18 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { PageHeader } from "../components/common/page-header";
 import { Button, Input } from "../components/common/ui-primitives";
 import { Plus, Loader2, Filter } from "lucide-react";
 import { ApplicationsTable } from "../components/applications/applications-table";
-import { ApplicationDrawer } from "../components/applications/application-drawer";
 import { EmptyState } from "../components/common/empty-state";
 import { Application, ApplicationFiltersState } from "../lib/types";
 import { getApplications, getJobs } from "../lib/api.service";
 
 export const ApplicationsPage = () => {
+  const navigate = useNavigate();
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedApplication, setSelectedApplication] =
-    useState<Application | null>(null);
 
   const [filters, setFilters] = useState<ApplicationFiltersState>({
     search: "",
@@ -135,7 +134,7 @@ export const ApplicationsPage = () => {
       {filteredApplications.length > 0 ? (
         <ApplicationsTable
           applications={filteredApplications}
-          onSelectApplication={setSelectedApplication}
+          onSelectApplication={(app) => navigate(`/applications/${app.id}`)}
         />
       ) : (
         <EmptyState
@@ -151,14 +150,6 @@ export const ApplicationsPage = () => {
               ? () => setFilters({ search: "", status: "ALL" })
               : undefined
           }
-        />
-      )}
-
-      {selectedApplication && (
-        <ApplicationDrawer
-          application={selectedApplication}
-          onClose={() => setSelectedApplication(null)}
-          onUpdate={fetchApplications}
         />
       )}
     </div>

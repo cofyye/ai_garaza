@@ -1,6 +1,7 @@
-import React, { useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { MOCK_CLIENTS } from "../lib/mock-data";
+import { Application, Assignment } from "../lib/types";
+import { getApplicationById, getAssignmentByApplication, generateAssignment } from "../lib/api.service";
 import { Button, Badge } from "../components/common/ui-primitives";
 import { getStatusColor, getInitials, formatDate } from "../lib/utils";
 import { 
@@ -14,327 +15,291 @@ import {
   UserPlus, 
   PlayCircle,
   Timer,
-  Send
+  Send,
+  Briefcase,
+  Building2,
+  Loader2,
+  CheckCircle,
+  Calendar
 } from "lucide-react";
 import { motion } from "framer-motion";
-
-// Types for Timeline Steps
-type TimelineStep = {
-  id: string;
-  title: string;
-  date?: string;
-  status: "completed" | "current" | "upcoming";
-  icon: React.ElementType;
-  description?: string;
-};
+import { formatDistanceToNow, format } from "date-fns";
 
 export const ClientDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const client = MOCK_CLIENTS.find((c) => c.id === id);
+  
+  const [application, setApplication] = useState<Application | null>(null);
+  const [assignment, setAssignment] = useState<Assignment | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!client) return <div className="p-6">Client not found</div>;
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!id) return;
+      setIsLoading(true);
+      try {
+        const appData = await getApplicationById(id);
+        setApplication(appData);
+        
+        // Try to fetch assignment, but don't fail if it doesn't exist or errors
+        try {
+          const assignData = await getAssignmentByApplication(id);
+          setAssignment(assignData);
+        } catch (e) {
+          console.log("No assignment or error fetching assignment");
+        }
+      } catch (err) {
+        console.error("Failed to fetch application:", err);
+        setError("Failed to load application details");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, [id]);
 
-  // --- Logic to build the Timeline based on Client Status ---
-  const timelineSteps: TimelineStep[] = useMemo(() => {
-    const steps: TimelineStep[] = [
-      {
-        id: "applied",
-        title: "Application Received",
-        date: "2 days ago", // Mock relative time
-        status: "completed",
-        icon: UserPlus,
-        description: `Applied for ${client.position}`,
-      },
-      {
-        id: "invite",
-        title: "Invitation Sent",
-        date: "1 day ago",
-        status: client.status === "NOT_STARTED" ? "current" : "completed",
-        icon: Mail,
-        description: "Interview link generated and sent",
-      },
-    ];
+  const handleGenerateAssignment = async () => {
+    if (!application || !confirm("Generate and send technical assignment to this candidate?")) return;
 
-    if (client.status === "IN_PROGRESS" || client.status === "COMPLETED" || client.status === "EXPIRED") {
-       steps.push({
-         id: "started",
-         title: "Interview Started",
-         date: client.status === "IN_PROGRESS" ? "Just now" : "Yesterday",
-         status: client.status === "IN_PROGRESS" ? "current" : "completed",
-         icon: PlayCircle,
-         description: "Candidate began the session",
-       });
-    } else {
-       steps.push({
-         id: "started",
-         title: "Interview Started",
-         status: "upcoming",
-         icon: PlayCircle,
-       });
+    setIsGenerating(true);
+    try {
+      await generateAssignment(application.id, 72);
+      const assignData = await getAssignmentByApplication(application.id);
+      setAssignment(assignData);
+    } catch (err) {
+      alert("Failed to generate assignment");
+    } finally {
+      setIsGenerating(false);
     }
+  };
 
-    if (client.status === "COMPLETED") {
-       steps.push({
-         id: "completed",
-         title: "Assessment Completed",
-         date: formatDate(client.lastUpdated),
-         status: "completed",
-         icon: CheckCircle2,
-         description: `Scored ${client.interviewScore}%`,
-       });
-    } else {
-       steps.push({
-         id: "completed",
-         title: "Assessment Completed",
-         status: "upcoming",
-         icon: CheckCircle2,
-       });
-    }
-    
-    return steps;
-  }, [client]);
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      </div>
+    );
+  }
 
-  // Determine Process Progress %
-  const progressPercentage = useMemo(() => {
-     switch(client.status) {
-         case "NOT_STARTED": return 35;
-         case "IN_PROGRESS": return 65;
-         case "COMPLETED": return 100;
-         case "EXPIRED": return 35;
-         default: return 0;
-     }
-  }, [client.status]);
+  if (error || !application) {
+    return (
+      <div className="p-6 text-center">
+        <h2 className="text-lg font-semibold text-gray-900 mb-2">{error || "Application not found"}</h2>
+        <Button variant="outline" onClick={() => navigate("/applications")}>Back to Applications</Button>
+      </div>
+    );
+  }
+
+  const statusStyles: Record<string, string> = {
+    pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    invited: "bg-blue-100 text-blue-800 border-blue-200",
+    completed: "bg-purple-100 text-purple-800 border-purple-200",
+    reviewed: "bg-indigo-100 text-indigo-800 border-indigo-200",
+    accepted: "bg-green-100 text-green-800 border-green-200",
+    rejected: "bg-red-100 text-red-800 border-red-200",
+  };
 
   return (
     <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-7xl mx-auto"
+        className="max-w-7xl mx-auto space-y-8 pb-12"
     >
-      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4 pl-0 hover:bg-transparent hover:text-gray-900">
-        <ArrowLeft className="h-4 w-4 mr-2" /> Back to Clients
-      </Button>
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center text-sm text-gray-500 hover:text-gray-900 transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" /> Back
+      </button>
 
-      {/* Header Card */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-          <div className="flex items-center gap-6">
-            <div className="h-20 w-20 rounded-full bg-gray-50 text-gray-900 flex items-center justify-center text-3xl font-bold border-4 border-white shadow-sm">
-              {getInitials(client.name)}
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{client.name}</h1>
-              <div className="flex items-center gap-3 mt-2 text-gray-500">
-                <div className="flex items-center gap-1.5 text-sm">
-                   <Mail className="h-4 w-4" /> {client.email}
-                </div>
-                <span className="text-gray-300">|</span>
-                <span className="font-medium text-gray-700 bg-gray-100 px-2 py-0.5 rounded text-sm">{client.position}</span>
+      {/* Header Section - Matching JobDetailPage */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="p-8">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-gray-900">{application.user_name || "Unknown Candidate"}</h1>
+                <Badge className={`${statusStyles[application.status] || "bg-gray-100 text-gray-800"} border`}>
+                  {application.status.toUpperCase()}
+                </Badge>
               </div>
-              <div className="mt-4 flex gap-2">
-                 <Badge className={getStatusColor(client.status)}>{client.status.replace("_", " ")}</Badge>
-                 {client.verdict && (
-                    <Badge className={getStatusColor(client.verdict)}>{client.verdict.replace("_", " ")}</Badge>
-                 )}
+              
+              <div className="flex flex-wrap gap-3">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
+                  <Mail className="h-3.5 w-3.5 text-gray-500" /> {application.user_email || "No email"}
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
+                  <Briefcase className="h-3.5 w-3.5 text-gray-500" /> {application.job_title}
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
+                  <Building2 className="h-3.5 w-3.5 text-gray-500" /> {application.company_name}
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
+                  <Clock className="h-3.5 w-3.5 text-gray-500" /> Applied {formatDistanceToNow(new Date(application.applied_at), { addSuffix: true })}
+                </div>
               </div>
             </div>
-          </div>
-          
-          <div className="flex flex-col items-end justify-center min-h-[80px]">
-             {client.interviewScore !== undefined && (
-                <div className="text-right">
-                    <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Total Score</div>
-                    <div className="text-5xl font-bold text-gray-900 leading-none">{client.interviewScore}</div>
-                </div>
-             )}
+
+            {/* Actions moved to sidebar */}
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* LEFT COLUMN: Modern Timeline */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                <Timer className="h-5 w-5 text-gray-500" /> Activity Timeline
-            </h3>
-            
-            <div className="relative pl-2">
-               {/* Vertical Line */}
-               <div className="absolute left-[19px] top-4 bottom-4 w-[2px] bg-gray-100" />
-               
-               <div className="space-y-8">
-                  {timelineSteps.map((step, index) => {
-                      const isLast = index === timelineSteps.length - 1;
-                      const isCompleted = step.status === "completed";
-                      const isCurrent = step.status === "current";
+        {/* LEFT COLUMN: Main Content */}
+        <div className="lg:col-span-2 space-y-8">
+          
+          {/* Technical Assignment Card */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6">Technical Assignment</h3>
 
-                      return (
-                          <div key={step.id} className="relative flex gap-4">
-                              {/* Icon Marker */}
-                              <div className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-300
-                                  ${isCompleted ? "border-gray-900 bg-gray-900 text-white" : 
-                                    isCurrent ? "border-gray-900 bg-white text-gray-900 ring-4 ring-gray-100" : 
-                                    "border-gray-200 bg-white text-gray-300"}`}
-                              >
-                                  <step.icon className="h-5 w-5" />
-                              </div>
+            {assignment ? (
+              <div className="space-y-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 text-lg">
+                      {assignment.task_title}
+                    </h4>
+                    <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
+                      <span className="font-medium">Difficulty:</span>
+                      <span className="capitalize px-2 py-0.5 bg-gray-100 rounded text-xs">
+                        {assignment.difficulty}
+                      </span>
+                    </p>
+                  </div>
+                  <Badge className={
+                    assignment.status === "sent" ? "bg-gray-100 text-gray-800 border-gray-200" :
+                    assignment.status === "submitted" ? "bg-gray-100 text-gray-800 border-gray-200" :
+                    "bg-gray-100 text-gray-800 border-gray-200"
+                  }>
+                    {assignment.status.toUpperCase()}
+                  </Badge>
+                </div>
 
-                              {/* Content */}
-                              <div className={`pt-1 ${step.status === 'upcoming' ? 'opacity-50' : 'opacity-100'}`}>
-                                  <p className="text-sm font-bold text-gray-900 leading-none">{step.title}</p>
-                                  <p className="text-xs text-gray-500 mt-1">{step.description || "Pending..."}</p>
-                                  {step.date && (
-                                    <p className="text-[10px] uppercase font-bold text-gray-400 mt-2 tracking-wide">{step.date}</p>
-                                  )}
-                              </div>
-                          </div>
-                      );
-                  })}
-               </div>
-            </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                    <Clock className="h-4 w-4 text-gray-500" />
+                    <span>{assignment.time_limit_hours}h time limit</span>
+                  </div>
+                  {assignment.deadline && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                      <Calendar className="h-4 w-4 text-gray-500" />
+                      <span>Due {format(new Date(assignment.deadline), "MMM d, HH:mm")}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                    <CheckCircle className="h-4 w-4 text-gray-500" />
+                    <span>{assignment.email_sent_count} email(s) sent</span>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-gray-100">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                    Key Requirements
+                  </p>
+                  <ul className="space-y-2">
+                    {assignment.task_requirements.slice(0, 3).map((req, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                        <div className="h-1.5 w-1.5 rounded-full bg-black mt-2 shrink-0" />
+                        <span>{req}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                <div className="bg-white p-3 rounded-full w-fit mx-auto mb-4 shadow-sm border border-gray-100">
+                  <Send className="h-6 w-6 text-gray-400" />
+                </div>
+                <h4 className="text-sm font-medium text-gray-900 mb-1">No Assignment Sent</h4>
+                <p className="text-sm text-gray-500 mb-6">Generate a technical task for this candidate.</p>
+                <Button
+                  onClick={handleGenerateAssignment}
+                  disabled={isGenerating}
+                  className="gap-2 shadow-lg shadow-blue-500/20"
+                >
+                  {isGenerating ? (
+                    <>
+                      <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      Generate & Send Assignment
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
+
+          {/* Cover Letter */}
+          {application.cover_letter && (
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
+              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Cover Letter</h3>
+              <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed whitespace-pre-wrap">
+                {application.cover_letter}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* RIGHT COLUMN: Results OR Progress Dashboard */}
-        <div className="lg:col-span-2 space-y-6">
-          {client.status === "COMPLETED" ? (
-             <>
-               {/* --- COMPLETED VIEW: Detailed Analysis --- */}
-               <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                      <BarChart3 className="h-5 w-5 text-gray-500" /> Skill Breakdown
-                  </h3>
-                  
-                  <div className="space-y-5">
-                     {[
-                        { label: "Technical Proficiency", score: 88, color: "bg-black" },
-                        { label: "Communication", score: 92, color: "bg-green-500" },
-                        { label: "Problem Solving", score: 75, color: "bg-orange-500" },
-                        { label: "System Design", score: 60, color: "bg-red-500" },
-                     ].map((skill) => (
-                        <div key={skill.label}>
-                           <div className="flex justify-between text-sm font-medium mb-1.5">
-                              <span className="text-gray-700">{skill.label}</span>
-                              <span className="text-gray-900 font-bold">{skill.score}/100</span>
-                           </div>
-                           <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                              <motion.div 
-                                initial={{ width: 0 }}
-                                animate={{ width: `${skill.score}%` }}
-                                transition={{ duration: 1, ease: "easeOut" }}
-                                className={`h-full ${skill.color}`} 
-                              />
-                           </div>
-                        </div>
-                     ))}
+        {/* RIGHT COLUMN: Sidebar Info */}
+        <div className="flex flex-col gap-6 h-full">
+          
+          {/* Internal Notes */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Internal Notes</h3>
+            {application.notes ? (
+              <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-100 text-sm text-yellow-800 leading-relaxed">
+                {application.notes}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic">No notes added yet.</p>
+            )}
+            <Button variant="outline" size="sm" className="w-full mt-4">Add Note</Button>
+          </div>
+
+          {/* Timeline / History Placeholder */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Activity</h3>
+            <div className="relative pl-2 space-y-6">
+               <div className="absolute left-[7px] top-2 bottom-2 w-[2px] bg-gray-100" />
+               
+               <div className="relative flex gap-3">
+                  <div className="relative z-10 h-4 w-4 rounded-full bg-blue-500 border-2 border-white ring-1 ring-gray-100 shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold text-gray-900">Application Received</p>
+                    <p className="text-[10px] text-gray-500">{formatDistanceToNow(new Date(application.applied_at), { addSuffix: true })}</p>
                   </div>
                </div>
-
-               <div className="grid md:grid-cols-2 gap-6">
-                  <div className="bg-emerald-50 rounded-xl border border-emerald-100 p-6">
-                      <h4 className="flex items-center gap-2 font-bold text-emerald-800 mb-3">
-                        <CheckCircle2 className="h-5 w-5" /> Strengths
-                      </h4>
-                      <ul className="list-disc pl-5 text-sm text-emerald-800 space-y-2 leading-relaxed">
-                        <li>Demonstrated deep understanding of asynchronous programming patterns.</li>
-                        <li>Clear and concise communication style during technical explanations.</li>
-                        <li>Efficiently solved the algorithmic challenge with optimal time complexity.</li>
-                      </ul>
-                  </div>
-
-                  <div className="bg-amber-50 rounded-xl border border-amber-100 p-6">
-                      <h4 className="flex items-center gap-2 font-bold text-amber-800 mb-3">
-                        <AlertCircle className="h-5 w-5" /> Areas for Improvement
-                      </h4>
-                      <ul className="list-disc pl-5 text-sm text-amber-800 space-y-2 leading-relaxed">
-                        <li>Could improve knowledge of distributed system consistency models.</li>
-                        <li>Missed edge cases in the initial test suite setup.</li>
-                      </ul>
-                  </div>
-               </div>
-
-               {/* Transcript */}
-               <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-gray-500" /> Key Transcript Moments
-                  </h3>
-                  <div className="space-y-4">
-                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="text-xs font-bold text-gray-900 bg-gray-200 px-2 py-1 rounded">QUESTION 1</span>
-                            <span className="text-xs font-medium text-gray-400">04:20</span>
-                        </div>
-                        <p className="font-semibold text-gray-900 mb-1">"How would you handle state management in a large scale application?"</p>
-                        <p className="text-sm text-gray-600 italic">"I usually start by breaking down the UI into atomic components and then deciding whether local state is sufficient or if a global store is needed. For complex flows..."</p>
-                     </div>
-                  </div>
-               </div>
-             </>
-          ) : (
-             // --- NOT COMPLETED VIEW: Progress Dashboard ---
-             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
-                <div className="flex items-center justify-between mb-8">
+               
+               {assignment && (
+                 <div className="relative flex gap-3">
+                    <div className="relative z-10 h-4 w-4 rounded-full bg-purple-500 border-2 border-white ring-1 ring-gray-100 shrink-0" />
                     <div>
-                        <h3 className="text-xl font-bold text-gray-900">Current Process Status</h3>
-                        <p className="text-gray-500 mt-1">Interview process is currently underway.</p>
+                      <p className="text-xs font-bold text-gray-900">Assignment Sent</p>
+                      <p className="text-[10px] text-gray-500">{assignment.sent_at ? formatDistanceToNow(new Date(assignment.sent_at), { addSuffix: true }) : 'Recently'}</p>
                     </div>
-                    <Badge className="bg-blue-50 text-blue-700 border-blue-100 px-3 py-1 text-sm">
-                        {progressPercentage}% Complete
-                    </Badge>
-                </div>
+                 </div>
+               )}
+            </div>
+          </div>
 
-                {/* Progress Bar Visual */}
-                <div className="mb-10">
-                    <div className="h-4 w-full bg-gray-100 rounded-full overflow-hidden mb-2">
-                        <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: `${progressPercentage}%` }}
-                            className="h-full bg-gray-900"
-                        />
-                    </div>
-                    <div className="flex justify-between text-xs font-medium text-gray-400 uppercase tracking-wide">
-                        <span>Applied</span>
-                        <span>Invited</span>
-                        <span>Interviewing</span>
-                        <span>Results</span>
-                    </div>
-                </div>
+          {/* Actions */}
+          <div className="flex flex-col gap-3 mt-auto">
+            <Button className="w-full bg-gray-100 text-gray-900 hover:bg-gray-200 border border-gray-200 h-12 text-base">
+              Schedule Interview
+            </Button>
+            <Button onClick={() => alert("Stub: Send Email")} className="w-full bg-black text-white hover:bg-gray-800 h-12 text-base shadow-sm">
+              Send Email
+            </Button>
+          </div>
 
-                <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="rounded-lg border border-gray-100 bg-gray-50 p-5">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-white rounded-md shadow-sm text-gray-900">
-                                <Clock className="h-5 w-5" />
-                            </div>
-                            <span className="font-semibold text-gray-900">Time Elapsed</span>
-                        </div>
-                        <p className="text-2xl font-bold text-gray-900 pl-1">2 Days</p>
-                        <p className="text-sm text-gray-500 pl-1">Since application</p>
-                    </div>
-
-                    <div className="rounded-lg border border-gray-100 bg-gray-50 p-5">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-white rounded-md shadow-sm text-gray-900">
-                                <Send className="h-5 w-5" />
-                            </div>
-                            <span className="font-semibold text-gray-900">Last Action</span>
-                        </div>
-                        <p className="text-lg font-bold text-gray-900 pl-1">Invitation Sent</p>
-                        <p className="text-sm text-gray-500 pl-1">Waiting for candidate</p>
-                    </div>
-                </div>
-
-                <div className="mt-8 pt-8 border-t border-gray-100 flex justify-end gap-3">
-                    <Button variant="outline">Preview Interview</Button>
-                    <Button className="bg-black hover:bg-gray-800 text-white gap-2">
-                        <Mail className="h-4 w-4" /> Resend Invitation
-                    </Button>
-                </div>
-             </div>
-          )}
         </div>
       </div>
     </motion.div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Application, Assignment } from "../../lib/types";
-import { X, Mail, Clock, CheckCircle, Calendar, Send } from "lucide-react";
-import { Button } from "../common/ui-primitives";
+import { X, Mail, Clock, CheckCircle, Calendar, Send, Briefcase, Building2, User } from "lucide-react";
+import { Button, Badge } from "../common/ui-primitives";
 import {
   getAssignmentByApplication,
   generateAssignment,
@@ -15,12 +15,12 @@ interface ApplicationDrawerProps {
 }
 
 const statusStyles: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  invited: "bg-blue-100 text-blue-800",
-  completed: "bg-purple-100 text-purple-800",
-  reviewed: "bg-indigo-100 text-indigo-800",
-  accepted: "bg-green-100 text-green-800",
-  rejected: "bg-red-100 text-red-800",
+  pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  invited: "bg-blue-100 text-blue-800 border-blue-200",
+  completed: "bg-purple-100 text-purple-800 border-purple-200",
+  reviewed: "bg-indigo-100 text-indigo-800 border-indigo-200",
+  accepted: "bg-green-100 text-green-800 border-green-200",
+  rejected: "bg-red-100 text-red-800 border-red-200",
 };
 
 const statusLabels: Record<string, string> = {
@@ -81,240 +81,166 @@ export const ApplicationDrawer: React.FC<ApplicationDrawerProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
       <div
-        className="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-2xl w-full bg-white shadow-xl flex flex-col">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">
-              Application Details
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Applied{" "}
-              {formatDistanceToNow(new Date(application.applied_at), {
-                addSuffix: true,
-              })}
-            </p>
+      <div className="fixed inset-y-0 right-0 max-w-2xl w-full bg-gray-50 shadow-2xl flex flex-col h-full border-l border-gray-200">
+        {/* Header Section - Styled like Job Page Header */}
+        <div className="bg-white border-b border-gray-200 p-8 shadow-sm z-10">
+          <div className="flex items-start justify-between mb-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {application.user_name || "Unknown Candidate"}
+                </h2>
+                <Badge className={`${statusStyles[application.status] || "bg-gray-100 text-gray-800"} border`}>
+                  {(statusLabels[application.status] || application.status).toUpperCase()}
+                </Badge>
+              </div>
+              
+              <div className="flex flex-wrap gap-3">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
+                  <Mail className="h-3.5 w-3.5 text-gray-500" /> {application.user_email || "No email"}
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
+                  <Briefcase className="h-3.5 w-3.5 text-gray-500" /> {application.job_title}
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
+                  <Clock className="h-3.5 w-3.5 text-gray-500" /> Applied {formatDistanceToNow(new Date(application.applied_at), { addSuffix: true })}
+                </div>
+              </div>
+            </div>
+            
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-500 transition-colors p-2 hover:bg-gray-100 rounded-full"
+            >
+              <X className="h-6 w-6" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-500 transition-colors"
-          >
-            <X className="h-6 w-6" />
-          </button>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-6">
-          {/* Status */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Status
-            </label>
-            <span
-              className={`px-3 py-1.5 inline-flex text-sm font-semibold rounded-full ${
-                statusStyles[application.status] || "bg-gray-100 text-gray-800"
-              }`}
-            >
-              {statusLabels[application.status] || application.status}
-            </span>
-          </div>
-
-          {/* Candidate Info */}
-          <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">
-              Candidate Information
-            </h3>
-            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold text-lg">
-                  {application.user_name
-                    ? application.user_name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase()
-                    : "?"}
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">
-                    {application.user_name || "Unknown"}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {application.user_email || "No email"}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Job Info */}
-          <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">
-              Position Applied For
-            </h3>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <p className="font-medium text-gray-900">
-                {application.job_title || "Unknown Position"}
-              </p>
-              <p className="text-sm text-gray-500">
-                {application.company_name || "Unknown Company"}
-              </p>
-            </div>
-          </div>
-
-          {/* Cover Letter */}
-          {application.cover_letter && (
-            <div className="mb-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">
-                Cover Letter
-              </h3>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                  {application.cover_letter}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Assignment Section */}
-          <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">
-              Technical Assignment
-            </h3>
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-8 space-y-6">
+          
+          {/* Technical Assignment Card */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6">Technical Assignment</h3>
 
             {isLoadingAssignment ? (
-              <div className="bg-gray-50 rounded-lg p-6 text-center">
-                <p className="text-sm text-gray-500">Loading assignment...</p>
+              <div className="flex items-center justify-center py-8">
+                <div className="h-6 w-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
               </div>
             ) : assignment ? (
-              <div className="bg-blue-50 rounded-lg p-4 space-y-4">
+              <div className="bg-blue-50/50 rounded-xl border border-blue-100 p-6 space-y-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-medium text-gray-900">
+                    <h4 className="font-semibold text-gray-900 text-lg">
                       {assignment.task_title}
-                    </p>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Difficulty:{" "}
-                      <span className="font-medium capitalize">
+                    </h4>
+                    <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
+                      <span className="font-medium">Difficulty:</span>
+                      <span className="capitalize px-2 py-0.5 bg-white rounded border border-blue-100 text-xs">
                         {assignment.difficulty}
                       </span>
                     </p>
                   </div>
-                  <span
-                    className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      assignment.status === "sent"
-                        ? "bg-blue-100 text-blue-800"
-                        : assignment.status === "submitted"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-800"
-                    }`}
-                  >
-                    {assignment.status}
-                  </span>
+                  <Badge className={
+                    assignment.status === "sent" ? "bg-blue-100 text-blue-800 border-blue-200" :
+                    assignment.status === "submitted" ? "bg-green-100 text-green-800 border-green-200" :
+                    "bg-gray-100 text-gray-800 border-gray-200"
+                  }>
+                    {assignment.status.toUpperCase()}
+                  </Badge>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Clock className="h-4 w-4" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-600 bg-white p-3 rounded-lg border border-blue-100">
+                    <Clock className="h-4 w-4 text-blue-500" />
                     <span>{assignment.time_limit_hours}h time limit</span>
                   </div>
                   {assignment.deadline && (
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Calendar className="h-4 w-4" />
-                      <span>
-                        Due{" "}
-                        {format(new Date(assignment.deadline), "MMM d, HH:mm")}
-                      </span>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 bg-white p-3 rounded-lg border border-blue-100">
+                      <Calendar className="h-4 w-4 text-blue-500" />
+                      <span>Due {format(new Date(assignment.deadline), "MMM d, HH:mm")}</span>
                     </div>
                   )}
-                  {assignment.sent_at && (
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Mail className="h-4 w-4" />
-                      <span>
-                        Sent{" "}
-                        {formatDistanceToNow(new Date(assignment.sent_at), {
-                          addSuffix: true,
-                        })}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <CheckCircle className="h-4 w-4" />
+                  <div className="flex items-center gap-2 text-sm text-gray-600 bg-white p-3 rounded-lg border border-blue-100">
+                    <CheckCircle className="h-4 w-4 text-blue-500" />
                     <span>{assignment.email_sent_count} email(s) sent</span>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-blue-200">
-                  <p className="text-xs text-gray-600 mb-2">
-                    Requirements ({assignment.task_requirements.length})
+                <div className="pt-4 border-t border-blue-100">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                    Key Requirements
                   </p>
-                  <ul className="text-sm text-gray-700 space-y-1">
-                    {assignment.task_requirements
-                      .slice(0, 3)
-                      .map((req, idx) => (
-                        <li key={idx} className="flex items-start gap-2">
-                          <span className="text-blue-500 mt-0.5">•</span>
-                          <span>{req}</span>
-                        </li>
-                      ))}
+                  <ul className="space-y-2">
+                    {assignment.task_requirements.slice(0, 3).map((req, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                        <div className="h-1.5 w-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
+                        <span>{req}</span>
+                      </li>
+                    ))}
                   </ul>
                 </div>
               </div>
             ) : (
-              <div className="bg-gray-50 rounded-lg p-6">
-                <div className="text-center">
-                  <Mail className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-sm text-gray-700 mb-4">
-                    No assignment sent yet
-                  </p>
-                  <Button
-                    onClick={handleGenerateAssignment}
-                    disabled={isGenerating}
-                    className="gap-2"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="h-4 w-4" />
-                        Generate & Send Assignment
-                      </>
-                    )}
-                  </Button>
-                  {error && (
-                    <p className="text-sm text-red-600 mt-2">{error}</p>
-                  )}
+              <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                <div className="bg-white p-3 rounded-full w-fit mx-auto mb-4 shadow-sm border border-gray-100">
+                  <Send className="h-6 w-6 text-gray-400" />
                 </div>
+                <h4 className="text-sm font-medium text-gray-900 mb-1">No Assignment Sent</h4>
+                <p className="text-sm text-gray-500 mb-6">Generate a technical task for this candidate.</p>
+                <Button
+                  onClick={handleGenerateAssignment}
+                  disabled={isGenerating}
+                  className="gap-2 shadow-lg shadow-blue-500/20"
+                >
+                  {isGenerating ? (
+                    <>
+                      <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      Generate & Send Assignment
+                    </>
+                  )}
+                </Button>
+                {error && (
+                  <p className="text-sm text-red-600 mt-4 bg-red-50 py-2 px-3 rounded-lg inline-block border border-red-100">{error}</p>
+                )}
               </div>
             )}
           </div>
 
-          {/* Notes */}
+          {/* Cover Letter Card */}
+          {application.cover_letter && (
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
+              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Cover Letter</h3>
+              <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed whitespace-pre-wrap">
+                {application.cover_letter}
+              </div>
+            </div>
+          )}
+
+          {/* Internal Notes Card */}
           {application.notes && (
-            <div className="mb-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">
-                Internal Notes
-              </h3>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                  {application.notes}
-                </p>
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
+              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Internal Notes</h3>
+              <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-100 text-sm text-yellow-800 leading-relaxed">
+                {application.notes}
               </div>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+        <div className="bg-white border-t border-gray-200 p-6 flex justify-end gap-3 z-10">
           <Button variant="outline" onClick={onClose}>
-            Close
+            Close Details
           </Button>
         </div>
       </div>

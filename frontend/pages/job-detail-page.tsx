@@ -4,6 +4,7 @@ import { Job, Application } from "../lib/types";
 import { getJobById, getApplications } from "../lib/api.service";
 import { Button, Badge } from "../components/common/ui-primitives";
 import { getStatusColor, formatDate, getInitials } from "../lib/utils";
+import { PageHeader } from "../components/common/page-header";
 import {
   ArrowLeft,
   MapPin,
@@ -15,6 +16,11 @@ import {
   Building2,
   DollarSign,
   Code,
+  ChevronDown,
+  Globe,
+  Clock,
+  Filter,
+  Download,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { GenerateLinkModal } from "../components/jobs/generate-link-modal";
@@ -27,6 +33,7 @@ export const JobDetailPage = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   // Fetch job and applications from API
   useEffect(() => {
@@ -77,267 +84,338 @@ export const JobDetailPage = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <Button
-        variant="ghost"
+    <div className="max-w-7xl mx-auto space-y-8 pb-12">
+      {/* Breadcrumb / Back */}
+      <button
         onClick={() => navigate(-1)}
-        className="mb-4 pl-0 hover:bg-transparent hover:text-gray-900"
+        className="flex items-center text-sm text-gray-500 hover:text-gray-900 transition-colors"
       >
         <ArrowLeft className="h-4 w-4 mr-2" /> Back to Jobs
-      </Button>
+      </button>
 
-      <div className="space-y-6">
-        {/* Main Job Details Card */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
-          {/* Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-3">
-                {job.title}
-              </h1>
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500">
-                <span className="flex items-center gap-1.5">
-                  <Building2 className="h-4 w-4 text-gray-400" /> {job.company}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <MapPin className="h-4 w-4 text-gray-400" /> {job.location} (
-                  {job.location_type})
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Briefcase className="h-4 w-4 text-gray-400" /> {job.job_type}{" "}
-                  · {job.experience_level}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="h-4 w-4 text-gray-400" /> Created{" "}
+      {/* Header Section */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="p-8">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {job.title}
+                </h1>
+                <Badge className={getStatusColor(job.status)}>
+                  {job.status.toUpperCase()}
+                </Badge>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
+                  <Building2 className="h-3.5 w-3.5 text-gray-500" />{" "}
+                  {job.company}
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
+                  <MapPin className="h-3.5 w-3.5 text-gray-500" />{" "}
+                  {job.location} ({job.location_type})
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
+                  <Briefcase className="h-3.5 w-3.5 text-gray-500" />{" "}
+                  {job.job_type}
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
+                  <Clock className="h-3.5 w-3.5 text-gray-500" /> Posted{" "}
                   {formatDate(job.created_at)}
-                </span>
+                </div>
               </div>
             </div>
-            <Badge className={getStatusColor(job.status)}>
-              {job.status.toUpperCase()}
-            </Badge>
-          </div>
 
-          {/* Salary & Tech Stack */}
-          <div className="flex flex-wrap gap-4 mb-8">
-            {job.salary_range &&
-              (job.salary_range.min || job.salary_range.max) && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border border-gray-200">
-                  <DollarSign className="h-4 w-4 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-900">
-                    {job.salary_range.min?.toLocaleString()} -{" "}
-                    {job.salary_range.max?.toLocaleString()}{" "}
-                    {job.salary_range.currency}
-                  </span>
-                </div>
-              )}
-            {job.tech_stack && job.tech_stack.length > 0 && (
-              <div className="flex items-center gap-2 flex-wrap">
-                <Code className="h-4 w-4 text-gray-400" />
-                {job.tech_stack.map((tech, i) => (
-                  <span
-                    key={i}
-                    className="px-2 py-1 bg-gray-50 border border-gray-100 rounded text-xs font-medium text-gray-600"
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            )}
+            <div className="flex items-center gap-3">
+              <Button variant="outline" onClick={() => alert("Stub: Edit Job")}>
+                Edit Job
+              </Button>
+              <Button onClick={() => setIsLinkModalOpen(true)}>
+                Generate Interview Link
+              </Button>
+            </div>
           </div>
+        </div>
+      </div>
 
-          {/* Content */}
-          <div className="space-y-8">
-            <div>
-              <h3 className="font-semibold text-lg text-gray-900 mb-3">
-                About the Role
-              </h3>
-              <p className="text-gray-600 leading-relaxed max-w-4xl whitespace-pre-wrap">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column: Job Content */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Description Card */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">
+              About the Role
+            </h3>
+            <div
+              className={`relative ${
+                !isDescriptionExpanded ? "max-h-48 overflow-hidden" : ""
+              }`}
+            >
+              <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
                 {job.description}
               </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-12">
-              {job.responsibilities && job.responsibilities.length > 0 && (
-                <div>
-                  <h3 className="font-semibold text-lg text-gray-900 mb-4">
-                    Responsibilities
-                  </h3>
-                  <ul className="space-y-3">
-                    {job.responsibilities.map((item, i) => (
-                      <li key={i} className="flex gap-3 text-gray-600">
-                        <Check className="h-5 w-5 text-gray-900 shrink-0 mt-0.5" />
-                        <span className="leading-relaxed">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {job.requirements && job.requirements.length > 0 && (
-                <div>
-                  <h3 className="font-semibold text-lg text-gray-900 mb-4">
-                    Requirements
-                  </h3>
-                  <ul className="space-y-3">
-                    {job.requirements.map((item, i) => (
-                      <li key={i} className="flex gap-3 text-gray-600">
-                        <div className="h-1.5 w-1.5 rounded-full bg-gray-300 mt-2.5 shrink-0" />
-                        <span className="leading-relaxed">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              {!isDescriptionExpanded && (
+                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent" />
               )}
             </div>
+            <button
+              onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+              className="mt-4 text-xs font-semibold text-black hover:text-gray-700 flex items-center gap-1 uppercase tracking-wide"
+            >
+              {isDescriptionExpanded ? "Show Less" : "Read More"}
+              <ChevronDown
+                className={`h-3 w-3 transition-transform ${
+                  isDescriptionExpanded ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+          </div>
 
-            {job.nice_to_have && job.nice_to_have.length > 0 && (
+          {/* Responsibilities & Requirements */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 space-y-8">
+            {job.responsibilities && job.responsibilities.length > 0 && (
               <div>
-                <h3 className="font-semibold text-lg text-gray-900 mb-4">
-                  Nice to Have
+                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">
+                  Responsibilities
                 </h3>
-                <ul className="space-y-2">
-                  {job.nice_to_have.map((item, i) => (
-                    <li key={i} className="flex gap-3 text-gray-500 text-sm">
-                      <div className="h-1.5 w-1.5 rounded-full bg-gray-300 mt-2 shrink-0" />
-                      <span>{item}</span>
+                <ul className="space-y-3">
+                  {job.responsibilities.map((item, i) => (
+                    <li key={i} className="flex gap-3 text-gray-600 text-sm">
+                      <div className="h-1.5 w-1.5 rounded-full bg-black mt-2.5 shrink-0" />
+                      <span className="leading-relaxed">{item}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
 
-            {job.benefits && job.benefits.length > 0 && (
+            {job.requirements && job.requirements.length > 0 && (
               <div>
-                <h3 className="font-semibold text-lg text-gray-900 mb-4">
-                  Benefits
+                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">
+                  Requirements
                 </h3>
-                <div className="flex flex-wrap gap-2">
-                  {job.benefits.map((benefit, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm font-medium"
-                    >
-                      {benefit}
-                    </span>
+                <ul className="space-y-3">
+                  {job.requirements.map((item, i) => (
+                    <li key={i} className="flex gap-3 text-gray-600 text-sm">
+                      <div className="h-1.5 w-1.5 rounded-full bg-black mt-2.5 shrink-0" />
+                      <span className="leading-relaxed">{item}</span>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </div>
             )}
           </div>
+        </div>
 
-          {/* Footer Action */}
-          <div className="mt-10 pt-6 border-t border-gray-100 flex justify-end">
-            <Button
-              className="h-12 px-6 text-base shadow-lg shadow-gray-100 transition-all hover:-translate-y-0.5"
-              onClick={() => setIsLinkModalOpen(true)}
-            >
-              Generate Interview Link
+        {/* Right Column: Sidebar Info */}
+        <div className="space-y-6 h-full flex flex-col">
+          {/* Job Details Card */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">
+              Job Details
+            </h3>
+            <div className="space-y-4">
+              {job.salary_range &&
+                (job.salary_range.min || job.salary_range.max) && (
+                  <div>
+                    <span className="text-xs text-gray-500 block mb-1">
+                      Salary Range
+                    </span>
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
+                      <DollarSign className="h-4 w-4 text-gray-400" />
+                      {job.salary_range.min?.toLocaleString()} -{" "}
+                      {job.salary_range.max?.toLocaleString()}{" "}
+                      {job.salary_range.currency}
+                    </div>
+                  </div>
+                )}
+
+              <div>
+                <span className="text-xs text-gray-500 block mb-1">
+                  Experience Level
+                </span>
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
+                  <Users className="h-4 w-4 text-gray-400" />
+                  {job.experience_level}
+                </div>
+              </div>
+
+              <div>
+                <span className="text-xs text-gray-500 block mb-1">
+                  Location Type
+                </span>
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
+                  <Globe className="h-4 w-4 text-gray-400" />
+                  {job.location_type}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tech Stack Card */}
+          {job.tech_stack && job.tech_stack.length > 0 && (
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">
+                Tech Stack
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {job.tech_stack.map((tech, i) => (
+                  <span
+                    key={i}
+                    className="px-2.5 py-1 bg-gray-50 border border-gray-200 rounded-md text-xs font-medium text-gray-700"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Benefits Card */}
+          {job.benefits && job.benefits.length > 0 && (
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 flex-1">
+              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">
+                Benefits
+              </h3>
+              <ul className="space-y-2">
+                {job.benefits.map((benefit, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-2 text-sm text-gray-600"
+                  >
+                    <div className="h-1.5 w-1.5 rounded-full bg-black mt-2 shrink-0" />
+                    <span>{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Applications Control Panel */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50/50">
+          <div className="flex items-center gap-4">
+            <h3 className="text-base font-bold text-gray-900">Applications</h3>
+            <span className="px-2.5 py-0.5 rounded-full bg-gray-200 text-gray-700 text-xs font-medium">
+              {applications.length}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" className="gap-2 text-gray-600">
+              <Filter className="h-4 w-4" /> Filter
+            </Button>
+            <Button variant="ghost" size="sm" className="gap-2 text-gray-600">
+              <Download className="h-4 w-4" /> Export
             </Button>
           </div>
         </div>
 
-        {/* Applications List (Full Width) */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="font-semibold text-lg text-gray-900">
-              Applications for this Role
-            </h3>
-            <button
-              onClick={() => navigate(`/applications?job_id=${job.id}`)}
-              className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-1.5 px-3 rounded-full text-xs font-medium transition-colors"
-            >
-              {applications.length} total applications →
-            </button>
-          </div>
-
-          {applications.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-gray-500">
-                <thead className="bg-gray-50 text-xs font-medium uppercase text-gray-500">
-                  <tr>
-                    <th className="px-6 py-3 rounded-l-lg">Candidate</th>
-                    <th className="px-6 py-3">Status</th>
-                    <th className="px-6 py-3">Applied</th>
-                    <th className="px-6 py-3 text-right rounded-r-lg">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {applications.slice(0, 5).map((app) => (
-                    <tr
-                      key={app.id}
-                      onClick={() => navigate(`/applications`)}
-                      className="group hover:bg-gray-50 cursor-pointer transition-colors"
-                    >
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center font-semibold text-white text-sm group-hover:shadow-sm transition-all">
-                            {app.user_name
-                              ? app.user_name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")
-                                  .toUpperCase()
-                              : "?"}
+        {applications.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-gray-50 border-b border-gray-100">
+                <tr>
+                  <th className="px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">
+                    Candidate
+                  </th>
+                  <th className="px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider">
+                    Applied
+                  </th>
+                  <th className="px-6 py-3 font-medium text-gray-500 text-xs uppercase tracking-wider text-right">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {applications.slice(0, 10).map((app) => (
+                  <tr
+                    key={app.id}
+                    onClick={() => navigate(`/applications/${app.id}`)}
+                    className="group hover:bg-gray-50 cursor-pointer transition-colors"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-gray-900 flex items-center justify-center font-semibold text-white text-xs">
+                          {app.user_name
+                            ? app.user_name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")
+                                .toUpperCase()
+                            : "?"}
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {app.user_name || "Unknown"}
                           </div>
-                          <div>
-                            <div className="font-medium text-gray-900">
-                              {app.user_name || "Unknown"}
-                            </div>
-                            <div className="text-xs text-gray-400">
-                              {app.user_email || "No email"}
-                            </div>
+                          <div className="text-xs text-gray-500">
+                            {app.user_email || "No email"}
                           </div>
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <Badge className={getStatusColor(app.status)}>
-                          {app.status}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-gray-500">
-                          {formatDate(app.applied_at)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <span className="text-gray-900 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                          View Application &rarr;
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {applications.length > 5 && (
-                <div className="mt-4 text-center">
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate(`/applications?job_id=${job.id}`)}
-                    className="text-sm"
-                  >
-                    View All {applications.length} Applications
-                  </Button>
-                </div>
-              )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Badge className={getStatusColor(app.status)}>
+                        {app.status}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-gray-500 text-xs">
+                        {formatDate(app.applied_at)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        View
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {applications.length > 10 && (
+              <div className="p-4 text-center border-t border-gray-100 bg-gray-50/30">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(`/applications?job_id=${job.id}`)}
+                  className="text-xs"
+                >
+                  View All {applications.length} Applications
+                </Button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <div className="bg-gray-50 h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Users className="h-6 w-6 text-gray-400" />
             </div>
-          ) : (
-            <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-              <Users className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500 text-sm">
-                No applications for this position yet.
-              </p>
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/applications`)}
-                className="mt-4 text-sm"
-              >
-                View All Applications
-              </Button>
-            </div>
-          )}
-        </div>
+            <h3 className="text-sm font-medium text-gray-900">
+              No applications yet
+            </h3>
+            <p className="text-sm text-gray-500 mt-1 max-w-sm mx-auto">
+              Share the interview link to start receiving applications for this
+              position.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => setIsLinkModalOpen(true)}
+              className="mt-4"
+            >
+              Generate Link
+            </Button>
+          </div>
+        )}
       </div>
 
       <GenerateLinkModal

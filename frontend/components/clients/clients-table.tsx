@@ -10,7 +10,10 @@ interface ClientsTableProps {
   onSelectClient: (client: Client) => void;
 }
 
-export const ClientsTable = ({ clients, onSelectClient }: ClientsTableProps) => {
+export const ClientsTable = ({
+  clients,
+  onSelectClient,
+}: ClientsTableProps) => {
   return (
     <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
@@ -37,14 +40,11 @@ export const ClientsTable = ({ clients, onSelectClient }: ClientsTableProps) => 
                 className="cursor-pointer group hover:bg-gray-50 transition-colors duration-150"
               >
                 <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 font-medium text-gray-600">
-                      {getInitials(client.name)}
+                  <div>
+                    <div className="font-medium text-gray-900">
+                      {client.name}
                     </div>
-                    <div>
-                      <div className="font-medium text-gray-900">{client.name}</div>
-                      <div className="text-gray-400">{client.email}</div>
-                    </div>
+                    <div className="text-gray-400">{client.email}</div>
                   </div>
                 </td>
                 <td className="px-6 py-4">
@@ -53,11 +53,19 @@ export const ClientsTable = ({ clients, onSelectClient }: ClientsTableProps) => 
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  <Badge className={getStatusColor(client.status)}>{client.status.replace("_", " ")}</Badge>
+                  <Badge className={getStatusColor(client.status)}>
+                    {client.status.replace("_", " ")}
+                  </Badge>
                 </td>
                 <td className="px-6 py-4 text-right">
                   {client.interviewScore ? (
-                    <span className={client.interviewScore > 80 ? "font-bold text-gray-900" : "text-gray-600"}>
+                    <span
+                      className={
+                        client.interviewScore > 80
+                          ? "font-bold text-gray-900"
+                          : "text-gray-600"
+                      }
+                    >
                       {client.interviewScore}%
                     </span>
                   ) : (
@@ -66,7 +74,9 @@ export const ClientsTable = ({ clients, onSelectClient }: ClientsTableProps) => 
                 </td>
                 <td className="px-6 py-4">
                   {client.verdict ? (
-                    <Badge className={getStatusColor(client.verdict)}>{client.verdict.replace("_", " ")}</Badge>
+                    <Badge className={getStatusColor(client.verdict)}>
+                      {client.verdict.replace("_", " ")}
+                    </Badge>
                   ) : (
                     "—"
                   )}
@@ -75,7 +85,14 @@ export const ClientsTable = ({ clients, onSelectClient }: ClientsTableProps) => 
                   {formatDate(client.lastUpdated)}
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onSelectClient(client); }}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectClient(client);
+                    }}
+                  >
                     <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-black transition-colors duration-200" />
                   </Button>
                 </td>
