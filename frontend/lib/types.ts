@@ -46,7 +46,6 @@ export interface SalaryRange {
 export interface Job {
   id: string;
   title: string;
-  company: string;
   location: string;
   location_type: LocationType;
   job_type: JobType;
@@ -58,7 +57,6 @@ export interface Job {
   tech_stack: string[];
   benefits: string[];
   salary_range?: SalaryRange;
-  company_website?: string;
   apply_url?: string;
   status: JobStatus;
   applications_count: number;
@@ -68,7 +66,6 @@ export interface Job {
 
 export interface JobCreate {
   title: string;
-  company: string;
   location: string;
   location_type?: LocationType;
   job_type?: JobType;
@@ -80,14 +77,12 @@ export interface JobCreate {
   tech_stack?: string[];
   benefits?: string[];
   salary_range?: SalaryRange;
-  company_website?: string;
   apply_url?: string;
   status?: JobStatus;
 }
 
 export interface JobUpdate {
   title?: string;
-  company?: string;
   location?: string;
   location_type?: LocationType;
   job_type?: JobType;
@@ -99,7 +94,6 @@ export interface JobUpdate {
   tech_stack?: string[];
   benefits?: string[];
   salary_range?: SalaryRange;
-  company_website?: string;
   apply_url?: string;
   status?: JobStatus;
 }
@@ -144,7 +138,6 @@ export interface Application {
   user_email?: string;
   user_name?: string;
   job_title?: string;
-  company_name?: string;
 }
 
 export interface ApplicationCreate {

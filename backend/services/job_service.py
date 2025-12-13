@@ -96,11 +96,10 @@ class JobService:
         return result.deleted_count > 0
     
     async def search_jobs(self, search_term: str, limit: int = 20) -> list[JobInDB]:
-        """Search jobs by title, company, or tech stack."""
+        """Search jobs by title, tech stack, or description."""
         query = {
             "$or": [
                 {"title": {"$regex": search_term, "$options": "i"}},
-                {"company": {"$regex": search_term, "$options": "i"}},
                 {"tech_stack": {"$regex": search_term, "$options": "i"}},
                 {"description": {"$regex": search_term, "$options": "i"}}
             ]

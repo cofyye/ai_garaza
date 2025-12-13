@@ -75,9 +75,6 @@ export const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
                   <div className="text-sm text-gray-900">
                     {application.job_title || "Unknown Position"}
                   </div>
-                  <div className="text-sm text-gray-500">
-                    {application.company_name || "Unknown Company"}
-                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span

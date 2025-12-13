@@ -53,7 +53,6 @@ class ApplicationInDB(ApplicationBase):
     user_email: Optional[str] = None
     user_name: Optional[str] = None
     job_title: Optional[str] = None
-    company_name: Optional[str] = None
 
     class Config:
         populate_by_name = True

@@ -1,18 +1,22 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Application, Assignment } from "../lib/types";
-import { getApplicationById, getAssignmentByApplication, generateAssignment } from "../lib/api.service";
+import {
+  getApplicationById,
+  getAssignmentByApplication,
+  generateAssignment,
+} from "../lib/api.service";
 import { Button, Badge } from "../components/common/ui-primitives";
 import { getStatusColor, getInitials, formatDate } from "../lib/utils";
-import { 
-  ArrowLeft, 
-  CheckCircle2, 
-  AlertCircle, 
-  Clock, 
-  FileText, 
-  BarChart3, 
-  Mail, 
-  UserPlus, 
+import {
+  ArrowLeft,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  FileText,
+  BarChart3,
+  Mail,
+  UserPlus,
   PlayCircle,
   Timer,
   Send,
@@ -20,7 +24,7 @@ import {
   Building2,
   Loader2,
   CheckCircle,
-  Calendar
+  Calendar,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatDistanceToNow, format } from "date-fns";
@@ -28,7 +32,7 @@ import { formatDistanceToNow, format } from "date-fns";
 export const ClientDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   const [application, setApplication] = useState<Application | null>(null);
   const [assignment, setAssignment] = useState<Assignment | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,7 +46,7 @@ export const ClientDetailPage = () => {
       try {
         const appData = await getApplicationById(id);
         setApplication(appData);
-        
+
         // Try to fetch assignment, but don't fail if it doesn't exist or errors
         try {
           const assignData = await getAssignmentByApplication(id);
@@ -61,7 +65,11 @@ export const ClientDetailPage = () => {
   }, [id]);
 
   const handleGenerateAssignment = async () => {
-    if (!application || !confirm("Generate and send technical assignment to this candidate?")) return;
+    if (
+      !application ||
+      !confirm("Generate and send technical assignment to this candidate?")
+    )
+      return;
 
     setIsGenerating(true);
     try {
@@ -86,8 +94,12 @@ export const ClientDetailPage = () => {
   if (error || !application) {
     return (
       <div className="p-6 text-center">
-        <h2 className="text-lg font-semibold text-gray-900 mb-2">{error || "Application not found"}</h2>
-        <Button variant="outline" onClick={() => navigate("/applications")}>Back to Applications</Button>
+        <h2 className="text-lg font-semibold text-gray-900 mb-2">
+          {error || "Application not found"}
+        </h2>
+        <Button variant="outline" onClick={() => navigate("/applications")}>
+          Back to Applications
+        </Button>
       </div>
     );
   }
@@ -102,10 +114,10 @@ export const ClientDetailPage = () => {
   };
 
   return (
-    <motion.div 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-7xl mx-auto space-y-8 pb-12"
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-7xl mx-auto space-y-8 pb-12"
     >
       <button
         onClick={() => navigate(-1)}
@@ -120,24 +132,33 @@ export const ClientDetailPage = () => {
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-gray-900">{application.user_name || "Unknown Candidate"}</h1>
-                <Badge className={`${statusStyles[application.status] || "bg-gray-100 text-gray-800"} border`}>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {application.user_name || "Unknown Candidate"}
+                </h1>
+                <Badge
+                  className={`${
+                    statusStyles[application.status] ||
+                    "bg-gray-100 text-gray-800"
+                  } border`}
+                >
                   {application.status.toUpperCase()}
                 </Badge>
               </div>
-              
+
               <div className="flex flex-wrap gap-3">
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
-                  <Mail className="h-3.5 w-3.5 text-gray-500" /> {application.user_email || "No email"}
+                  <Mail className="h-3.5 w-3.5 text-gray-500" />{" "}
+                  {application.user_email || "No email"}
                 </div>
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
-                  <Briefcase className="h-3.5 w-3.5 text-gray-500" /> {application.job_title}
+                  <Briefcase className="h-3.5 w-3.5 text-gray-500" />{" "}
+                  {application.job_title}
                 </div>
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
-                  <Building2 className="h-3.5 w-3.5 text-gray-500" /> {application.company_name}
-                </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
-                  <Clock className="h-3.5 w-3.5 text-gray-500" /> Applied {formatDistanceToNow(new Date(application.applied_at), { addSuffix: true })}
+                  <Clock className="h-3.5 w-3.5 text-gray-500" /> Applied{" "}
+                  {formatDistanceToNow(new Date(application.applied_at), {
+                    addSuffix: true,
+                  })}
                 </div>
               </div>
             </div>
@@ -148,13 +169,13 @@ export const ClientDetailPage = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
         {/* LEFT COLUMN: Main Content */}
         <div className="lg:col-span-2 space-y-8">
-          
           {/* Technical Assignment Card */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6">Technical Assignment</h3>
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6">
+              Technical Assignment
+            </h3>
 
             {assignment ? (
               <div className="space-y-6">
@@ -170,11 +191,15 @@ export const ClientDetailPage = () => {
                       </span>
                     </p>
                   </div>
-                  <Badge className={
-                    assignment.status === "sent" ? "bg-gray-100 text-gray-800 border-gray-200" :
-                    assignment.status === "submitted" ? "bg-gray-100 text-gray-800 border-gray-200" :
-                    "bg-gray-100 text-gray-800 border-gray-200"
-                  }>
+                  <Badge
+                    className={
+                      assignment.status === "sent"
+                        ? "bg-gray-100 text-gray-800 border-gray-200"
+                        : assignment.status === "submitted"
+                        ? "bg-gray-100 text-gray-800 border-gray-200"
+                        : "bg-gray-100 text-gray-800 border-gray-200"
+                    }
+                  >
                     {assignment.status.toUpperCase()}
                   </Badge>
                 </div>
@@ -187,7 +212,10 @@ export const ClientDetailPage = () => {
                   {assignment.deadline && (
                     <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
                       <Calendar className="h-4 w-4 text-gray-500" />
-                      <span>Due {format(new Date(assignment.deadline), "MMM d, HH:mm")}</span>
+                      <span>
+                        Due{" "}
+                        {format(new Date(assignment.deadline), "MMM d, HH:mm")}
+                      </span>
                     </div>
                   )}
                   <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
@@ -201,12 +229,17 @@ export const ClientDetailPage = () => {
                     Key Requirements
                   </p>
                   <ul className="space-y-2">
-                    {assignment.task_requirements.slice(0, 3).map((req, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
-                        <div className="h-1.5 w-1.5 rounded-full bg-black mt-2 shrink-0" />
-                        <span>{req}</span>
-                      </li>
-                    ))}
+                    {assignment.task_requirements
+                      .slice(0, 3)
+                      .map((req, idx) => (
+                        <li
+                          key={idx}
+                          className="flex items-start gap-2 text-sm text-gray-700"
+                        >
+                          <div className="h-1.5 w-1.5 rounded-full bg-black mt-2 shrink-0" />
+                          <span>{req}</span>
+                        </li>
+                      ))}
                   </ul>
                 </div>
               </div>
@@ -215,8 +248,12 @@ export const ClientDetailPage = () => {
                 <div className="bg-white p-3 rounded-full w-fit mx-auto mb-4 shadow-sm border border-gray-100">
                   <Send className="h-6 w-6 text-gray-400" />
                 </div>
-                <h4 className="text-sm font-medium text-gray-900 mb-1">No Assignment Sent</h4>
-                <p className="text-sm text-gray-500 mb-6">Generate a technical task for this candidate.</p>
+                <h4 className="text-sm font-medium text-gray-900 mb-1">
+                  No Assignment Sent
+                </h4>
+                <p className="text-sm text-gray-500 mb-6">
+                  Generate a technical task for this candidate.
+                </p>
                 <Button
                   onClick={handleGenerateAssignment}
                   disabled={isGenerating}
@@ -228,9 +265,7 @@ export const ClientDetailPage = () => {
                       Generating...
                     </>
                   ) : (
-                    <>
-                      Generate & Send Assignment
-                    </>
+                    <>Generate & Send Assignment</>
                   )}
                 </Button>
               </div>
@@ -240,7 +275,9 @@ export const ClientDetailPage = () => {
           {/* Cover Letter */}
           {application.cover_letter && (
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
-              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Cover Letter</h3>
+              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">
+                Cover Letter
+              </h3>
               <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed whitespace-pre-wrap">
                 {application.cover_letter}
               </div>
@@ -250,43 +287,64 @@ export const ClientDetailPage = () => {
 
         {/* RIGHT COLUMN: Sidebar Info */}
         <div className="flex flex-col gap-6 h-full">
-          
           {/* Internal Notes */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Internal Notes</h3>
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">
+              Internal Notes
+            </h3>
             {application.notes ? (
               <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-100 text-sm text-yellow-800 leading-relaxed">
                 {application.notes}
               </div>
             ) : (
-              <p className="text-sm text-gray-500 italic">No notes added yet.</p>
+              <p className="text-sm text-gray-500 italic">
+                No notes added yet.
+              </p>
             )}
-            <Button variant="outline" size="sm" className="w-full mt-4">Add Note</Button>
+            <Button variant="outline" size="sm" className="w-full mt-4">
+              Add Note
+            </Button>
           </div>
 
           {/* Timeline / History Placeholder */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Activity</h3>
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">
+              Activity
+            </h3>
             <div className="relative pl-2 space-y-6">
-               <div className="absolute left-[7px] top-2 bottom-2 w-[2px] bg-gray-100" />
-               
-               <div className="relative flex gap-3">
-                  <div className="relative z-10 h-4 w-4 rounded-full bg-blue-500 border-2 border-white ring-1 ring-gray-100 shrink-0" />
+              <div className="absolute left-[7px] top-2 bottom-2 w-[2px] bg-gray-100" />
+
+              <div className="relative flex gap-3">
+                <div className="relative z-10 h-4 w-4 rounded-full bg-blue-500 border-2 border-white ring-1 ring-gray-100 shrink-0" />
+                <div>
+                  <p className="text-xs font-bold text-gray-900">
+                    Application Received
+                  </p>
+                  <p className="text-[10px] text-gray-500">
+                    {formatDistanceToNow(new Date(application.applied_at), {
+                      addSuffix: true,
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              {assignment && (
+                <div className="relative flex gap-3">
+                  <div className="relative z-10 h-4 w-4 rounded-full bg-purple-500 border-2 border-white ring-1 ring-gray-100 shrink-0" />
                   <div>
-                    <p className="text-xs font-bold text-gray-900">Application Received</p>
-                    <p className="text-[10px] text-gray-500">{formatDistanceToNow(new Date(application.applied_at), { addSuffix: true })}</p>
+                    <p className="text-xs font-bold text-gray-900">
+                      Assignment Sent
+                    </p>
+                    <p className="text-[10px] text-gray-500">
+                      {assignment.sent_at
+                        ? formatDistanceToNow(new Date(assignment.sent_at), {
+                            addSuffix: true,
+                          })
+                        : "Recently"}
+                    </p>
                   </div>
-               </div>
-               
-               {assignment && (
-                 <div className="relative flex gap-3">
-                    <div className="relative z-10 h-4 w-4 rounded-full bg-purple-500 border-2 border-white ring-1 ring-gray-100 shrink-0" />
-                    <div>
-                      <p className="text-xs font-bold text-gray-900">Assignment Sent</p>
-                      <p className="text-[10px] text-gray-500">{assignment.sent_at ? formatDistanceToNow(new Date(assignment.sent_at), { addSuffix: true }) : 'Recently'}</p>
-                    </div>
-                 </div>
-               )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -295,11 +353,13 @@ export const ClientDetailPage = () => {
             <Button className="w-full bg-gray-100 text-gray-900 hover:bg-gray-200 border border-gray-200 h-12 text-base">
               Schedule Interview
             </Button>
-            <Button onClick={() => alert("Stub: Send Email")} className="w-full bg-black text-white hover:bg-gray-800 h-12 text-base shadow-sm">
+            <Button
+              onClick={() => alert("Stub: Send Email")}
+              className="w-full bg-black text-white hover:bg-gray-800 h-12 text-base shadow-sm"
+            >
               Send Email
             </Button>
           </div>
-
         </div>
       </div>
     </motion.div>

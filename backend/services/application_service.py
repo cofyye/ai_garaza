@@ -70,7 +70,6 @@ class ApplicationService:
             job = await self.jobs_collection.find_one({"_id": ObjectId(app["job_id"])})
             if job:
                 app["job_title"] = job.get("title")
-                app["company_name"] = job.get("company")
         
         return ApplicationInDB(**app)
     
@@ -113,8 +112,7 @@ class ApplicationService:
                 "$addFields": {
                     "user_email": {"$arrayElemAt": ["$user_data.email", 0]},
                     "user_name": {"$arrayElemAt": ["$user_data.full_name", 0]},
-                    "job_title": {"$arrayElemAt": ["$job_data.title", 0]},
-                    "company_name": {"$arrayElemAt": ["$job_data.company", 0]}
+                    "job_title": {"$arrayElemAt": ["$job_data.title", 0]}
                 }
             },
             {"$project": {"user_data": 0, "job_data": 0}}

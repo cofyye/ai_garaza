@@ -119,8 +119,7 @@ async def get_applications(
             "$addFields": {
                 "user_email": {"$arrayElemAt": ["$user_data.email", 0]},
                 "user_name": {"$arrayElemAt": ["$user_data.full_name", 0]},
-                "job_title": {"$arrayElemAt": ["$job_data.title", 0]},
-                "company_name": {"$arrayElemAt": ["$job_data.company", 0]}
+                "job_title": {"$arrayElemAt": ["$job_data.title", 0]}
             }
         },
         {"$project": {"user_data": 0, "job_data": 0}}

@@ -109,10 +109,6 @@ export const JobDetailPage = () => {
 
               <div className="flex flex-wrap gap-3">
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
-                  <Building2 className="h-3.5 w-3.5 text-gray-500" />{" "}
-                  {job.company}
-                </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-xs font-medium text-gray-600 border border-gray-200">
                   <MapPin className="h-3.5 w-3.5 text-gray-500" />{" "}
                   {job.location} ({job.location_type})
                 </div>

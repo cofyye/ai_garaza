@@ -53,8 +53,7 @@ export const ApplicationsPage = () => {
       (app) =>
         app.user_name?.toLowerCase().includes(searchLower) ||
         app.user_email?.toLowerCase().includes(searchLower) ||
-        app.job_title?.toLowerCase().includes(searchLower) ||
-        app.company_name?.toLowerCase().includes(searchLower)
+        app.job_title?.toLowerCase().includes(searchLower)
     );
   }, [applications, filters.search]);
 
