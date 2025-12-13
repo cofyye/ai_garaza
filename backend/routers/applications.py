@@ -56,6 +56,85 @@ async def create_application(
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@router.get("/", response_model=list[ApplicationInDB])
+async def get_applications(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    job_id: str = Query(None, description="Filter by job ID"),
+    user_id: str = Query(None, description="Filter by user ID"),
+    status: str = Query(None, description="Filter by status"),
+    service: ApplicationService = Depends(get_application_service)
+):
+    """
+    Get all applications with optional filters.
+    
+    - **skip**: Number of records to skip (pagination)
+    - **limit**: Maximum number of records to return
+    - **job_id**: Filter by specific job
+    - **user_id**: Filter by specific user
+    - **status**: Filter by application status
+    """
+    # If job_id is provided, use the specific method
+    if job_id:
+        return await service.get_applications_by_job(job_id, status)
+    
+    # If user_id is provided, use the specific method
+    if user_id:
+        return await service.get_applications_by_user(user_id)
+    
+    # Otherwise, get all applications with pagination and enrichment
+    match_stage = {}
+    if status:
+        match_stage["status"] = status
+    
+    # Aggregation pipeline to enrich with user and job data
+    pipeline = [
+        {"$match": match_stage} if match_stage else {"$match": {}},
+        {"$sort": {"applied_at": -1}},
+        {"$skip": skip},
+        {"$limit": limit},
+        {
+            "$lookup": {
+                "from": "users",
+                "let": {"user_id_str": "$user_id"},
+                "pipeline": [
+                    {"$addFields": {"_id_str": {"$toString": "$_id"}}},
+                    {"$match": {"$expr": {"$eq": ["$_id_str", "$$user_id_str"]}}}
+                ],
+                "as": "user_data"
+            }
+        },
+        {
+            "$lookup": {
+                "from": "jobs",
+                "let": {"job_id_str": "$job_id"},
+                "pipeline": [
+                    {"$addFields": {"_id_str": {"$toString": "$_id"}}},
+                    {"$match": {"$expr": {"$eq": ["$_id_str", "$$job_id_str"]}}}
+                ],
+                "as": "job_data"
+            }
+        },
+        {
+            "$addFields": {
+                "user_email": {"$arrayElemAt": ["$user_data.email", 0]},
+                "user_name": {"$arrayElemAt": ["$user_data.full_name", 0]},
+                "job_title": {"$arrayElemAt": ["$job_data.title", 0]},
+                "company_name": {"$arrayElemAt": ["$job_data.company", 0]}
+            }
+        },
+        {"$project": {"user_data": 0, "job_data": 0}}
+    ]
+    
+    cursor = service.collection.aggregate(pipeline)
+    applications = await cursor.to_list(length=limit)
+    
+    for app in applications:
+        app["_id"] = str(app["_id"])
+    
+    return [ApplicationInDB(**app) for app in applications]
+
+
 @router.get("/{application_id}", response_model=ApplicationInDB)
 async def get_application(
     application_id: str,

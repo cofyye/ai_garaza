@@ -75,15 +75,52 @@ class ApplicationService:
         return ApplicationInDB(**app)
     
     async def get_applications_by_job(self, job_id: str, status: Optional[str] = None) -> list[ApplicationInDB]:
-        """Get all applications for a specific job."""
+        """Get all applications for a specific job with user and job details."""
         if not ObjectId.is_valid(job_id):
             return []
         
-        query = {"job_id": job_id}
+        match_stage = {"job_id": job_id}
         if status:
-            query["status"] = status
+            match_stage["status"] = status
         
-        cursor = self.collection.find(query).sort("applied_at", -1)
+        # Aggregation pipeline to enrich with user and job data
+        pipeline = [
+            {"$match": match_stage},
+            {"$sort": {"applied_at": -1}},
+            {
+                "$lookup": {
+                    "from": "users",
+                    "let": {"user_id_str": "$user_id"},
+                    "pipeline": [
+                        {"$addFields": {"_id_str": {"$toString": "$_id"}}},
+                        {"$match": {"$expr": {"$eq": ["$_id_str", "$$user_id_str"]}}}
+                    ],
+                    "as": "user_data"
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "jobs",
+                    "let": {"job_id_str": "$job_id"},
+                    "pipeline": [
+                        {"$addFields": {"_id_str": {"$toString": "$_id"}}},
+                        {"$match": {"$expr": {"$eq": ["$_id_str", "$$job_id_str"]}}}
+                    ],
+                    "as": "job_data"
+                }
+            },
+            {
+                "$addFields": {
+                    "user_email": {"$arrayElemAt": ["$user_data.email", 0]},
+                    "user_name": {"$arrayElemAt": ["$user_data.full_name", 0]},
+                    "job_title": {"$arrayElemAt": ["$job_data.title", 0]},
+                    "company_name": {"$arrayElemAt": ["$job_data.company", 0]}
+                }
+            },
+            {"$project": {"user_data": 0, "job_data": 0}}
+        ]
+        
+        cursor = self.collection.aggregate(pipeline)
         apps = await cursor.to_list(length=100)
         
         for app in apps:
