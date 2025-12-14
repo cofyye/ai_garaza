@@ -268,6 +268,11 @@ class AssignmentService:
         # Use session_url if available, otherwise fall back to assignment ID
         interview_link = assignment.get('session_url', f"http://localhost:3000/#/interview/{assignment.get('session_id', assignment_id)}")
         
+        # Log interview link for easy access
+        print(f"\n🔗 INTERVIEW LINK FOR {user.get('full_name', 'Candidate')}:")
+        print(f"   {interview_link}")
+        print(f"   (Also sent via email to {user.get('email')})\n")
+        
         email_sent = email_service.send_assignment_email(
             to_email=user.get('email'),
             candidate_name=user.get('full_name', 'Candidate'),

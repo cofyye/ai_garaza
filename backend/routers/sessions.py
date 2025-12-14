@@ -71,8 +71,57 @@ async def run_interview_analysis(
         logger.info(f"Starting interview analysis for session {session_id}")
         
         # Extract data for analysis
-        candidate_name = session_doc.get("candidate_context", {}).get("name", "Unknown")
-        position = session_doc.get("job_context", {}).get("title", "Unknown Position")
+        candidate_context = session_doc.get("candidate_context", {})
+        job_context = session_doc.get("job_context", {})
+        
+        # DEBUG: Log what we found
+        logger.info(f"🔍 Candidate context from session: {candidate_context}")
+        logger.info(f"🔍 Job context from session: {job_context}")
+        
+        candidate_name = candidate_context.get("name") if candidate_context else None
+        position = job_context.get("title") if job_context else None
+        
+        # FALLBACK: If session doesn't have candidate/job context, try loading from assignment
+        if (not candidate_name or candidate_name == "Unknown Candidate") or (not position or position == "Unknown Position"):
+            logger.warning(f"⚠️  Missing context in session, attempting to load from assignment...")
+            
+            # Load from assignment via application chain
+            application_id = assignment.get("application_id")
+            if application_id:
+                applications_collection = db["applications"]
+                application = await applications_collection.find_one({"_id": application_id})
+                
+                if application:
+                    # Get candidate name from user
+                    if not candidate_name or candidate_name == "Unknown Candidate":
+                        user_id = application.get("user_id")
+                        if user_id:
+                            users_collection = db["users"]
+                            user = await users_collection.find_one({"_id": user_id})
+                            if user:
+                                candidate_name = user.get("name") or user.get("email", "").split("@")[0] or "Unknown Candidate"
+                                logger.info(f"✅ Loaded candidate name from user: {candidate_name}")
+                    
+                    # Get position from job
+                    if not position or position == "Unknown Position":
+                        job_id = application.get("job_id")
+                        if job_id:
+                            jobs_collection = db["jobs"]
+                            job = await jobs_collection.find_one({"_id": job_id})
+                            if job:
+                                position = job.get("title") or "Unknown Position"
+                                logger.info(f"✅ Loaded position from job: {position}")
+        
+        logger.info(f"📝 Final - Name: {candidate_name}, Position: {position}")
+        
+        # Ensure we have valid names (never None)
+        if not candidate_name or candidate_name == "Unknown Candidate":
+            candidate_name = "Unknown Candidate"
+            logger.warning(f"⚠️  Could not determine candidate name for session {session_id}")
+        
+        if not position or position == "Unknown Position":
+            position = "Unknown Position"
+            logger.warning(f"⚠️  Could not determine position for session {session_id}")
         conversation = session_doc.get("messages", [])
         code_data = session_doc.get("code", {})
         final_code = code_data.get("current", "")

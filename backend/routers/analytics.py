@@ -91,10 +91,6 @@ async def get_analytics(
         
         candidates = []
         async for doc in cursor:
-            # Debug log to see what's actually in the document
-            logger.info(f"Document keys: {list(doc.keys())}")
-            logger.info(f"candidate_name: {doc.get('candidate_name')}, position: {doc.get('position')}")
-            
             # Transform to frontend format
             # Ensure name and position are never None
             candidate_name = doc.get("candidate_name") or "Unknown Candidate"

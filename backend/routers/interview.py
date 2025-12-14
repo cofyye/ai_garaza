@@ -188,16 +188,18 @@ async def get_interview_session(session_id: str, db):
 
 
 async def _load_candidate_context(db, assignment: dict) -> dict:
-    candidate_context = {"name": None, "email": None}
+    candidate_context = {"name": "Unknown Candidate", "email": "unknown@example.com"}
     application_id = assignment.get("application_id")
     
     if not application_id:
+        logger.warning(f"No application_id in assignment: {assignment.get('_id')}")
         return candidate_context
     
     applications_collection = db["applications"]
     application = await applications_collection.find_one({"_id": application_id})
     
     if not application:
+        logger.warning(f"Application not found: {application_id}")
         return candidate_context
     
     user_id = application.get("user_id")
@@ -205,23 +207,29 @@ async def _load_candidate_context(db, assignment: dict) -> dict:
         users_collection = db["users"]
         user = await users_collection.find_one({"_id": user_id})
         if user:
-            candidate_context["name"] = user.get("name") or user.get("email", "").split("@")[0]
-            candidate_context["email"] = user.get("email")
+            candidate_context["name"] = user.get("name") or user.get("email", "").split("@")[0] or "Unknown Candidate"
+            candidate_context["email"] = user.get("email") or "unknown@example.com"
+        else:
+            logger.warning(f"User not found: {user_id}")
+    else:
+        logger.warning(f"No user_id in application: {application_id}")
     
     return candidate_context
 
 
 async def _load_job_context(db, assignment: dict) -> dict:
-    job_context = {"title": None, "experience_level": "mid", "tech_stack": [], "requirements": []}
+    job_context = {"title": "Unknown Position", "experience_level": "mid", "tech_stack": [], "requirements": []}
     application_id = assignment.get("application_id")
     
     if not application_id:
+        logger.warning(f"No application_id in assignment for job context")
         return job_context
     
     applications_collection = db["applications"]
     application = await applications_collection.find_one({"_id": application_id})
     
     if not application:
+        logger.warning(f"Application not found for job context: {application_id}")
         return job_context
     
     job_id = application.get("job_id")
@@ -229,10 +237,14 @@ async def _load_job_context(db, assignment: dict) -> dict:
         jobs_collection = db["jobs"]
         job = await jobs_collection.find_one({"_id": job_id})
         if job:
-            job_context["title"] = job.get("title")
+            job_context["title"] = job.get("title") or "Unknown Position"
             job_context["experience_level"] = job.get("experience_level", "mid")
             job_context["tech_stack"] = job.get("tech_stack", [])
             job_context["requirements"] = job.get("requirements", [])
+        else:
+            logger.warning(f"Job not found: {job_id}")
+    else:
+        logger.warning(f"No job_id in application: {application_id}")
     
     return job_context
 
