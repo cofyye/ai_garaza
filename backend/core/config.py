@@ -33,6 +33,13 @@ class Settings(BaseSettings):
     # CORS / Frontend Config
     FRONTEND_URL: str = "http://localhost:3000"
     
+    # Email Config
+    EMAIL_USER: str | None = None
+    EMAIL_PASS: str | None = None
+    EMAIL_SMTP: str = "smtp.gmail.com"
+    EMAIL_PORT: int = 465
+    EMAIL_FROM_NAME: str = "Engval.ai Team"
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

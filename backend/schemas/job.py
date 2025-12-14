@@ -51,6 +51,7 @@ class SalaryRange(BaseModel):
 class JobBase(BaseModel):
     """Base job fields."""
     title: str = Field(..., description="Job title (e.g., Senior Backend Engineer)")
+    company: str = Field(default="Company", description="Company name")
     location: str = Field(..., description="Location (e.g., Belgrade, Serbia or Remote)")
     location_type: LocationType = LocationType.HYBRID
     job_type: JobType = JobType.FULL_TIME
@@ -80,6 +81,7 @@ class JobCreate(JobBase):
 class JobUpdate(BaseModel):
     """Job update schema - all fields optional."""
     title: Optional[str] = None
+    company: Optional[str] = None
     location: Optional[str] = None
     location_type: Optional[LocationType] = None
     job_type: Optional[JobType] = None
