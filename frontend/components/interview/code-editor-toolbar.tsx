@@ -7,6 +7,7 @@ interface CodeEditorToolbarProps {
   isRunning: boolean;
   onLanguageChange: (language: string) => void;
   onRunCode: () => void;
+  disabled?: boolean;
 }
 
 export const CodeEditorToolbar: React.FC<CodeEditorToolbarProps> = ({
@@ -14,6 +15,7 @@ export const CodeEditorToolbar: React.FC<CodeEditorToolbarProps> = ({
   isRunning,
   onLanguageChange,
   onRunCode,
+  disabled = false,
 }) => {
   return (
     <div className="h-12 border-b border-gray-200 flex items-center justify-between px-4 bg-gray-50/50">
@@ -26,9 +28,10 @@ export const CodeEditorToolbar: React.FC<CodeEditorToolbarProps> = ({
 
       <div className="flex items-center gap-3">
         <select
-          className="text-xs border-none bg-transparent font-medium text-gray-600 focus:ring-0 cursor-pointer hover:text-gray-900"
+          className="text-xs border-none bg-transparent font-medium text-gray-600 focus:ring-0 cursor-pointer hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
           value={selectedLanguage}
           onChange={(e) => onLanguageChange(e.target.value)}
+          disabled={disabled}
         >
           <option value="python">Python 3.10</option>
           <option value="javascript" disabled>
@@ -36,7 +39,7 @@ export const CodeEditorToolbar: React.FC<CodeEditorToolbarProps> = ({
           </option>
         </select>
         <div className="h-4 w-[1px] bg-gray-300" />
-        <Button onClick={onRunCode} disabled={isRunning} className="h-8 text-xs gap-2">
+        <Button onClick={onRunCode} disabled={isRunning || disabled} className="h-8 text-xs gap-2">
           {isRunning ? (
             <Loader2 className="h-3 w-3 animate-spin" />
           ) : (

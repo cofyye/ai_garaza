@@ -390,3 +390,139 @@ export async function completeSession(
     body: JSON.stringify(body),
   });
 }
+
+// ============ Interview API (Agent 2) ============
+
+export interface InterviewMessage {
+  role: "user" | "assistant" | "system";
+  text: string;
+  ts: string;
+}
+
+export interface InterviewResponse {
+  session_id: string;
+  stage: string;
+  can_edit_code: boolean;
+  task_unlocked: boolean;
+  interview_ended: boolean;
+  early_termination: boolean;
+  assistant?: {
+    text: string;
+    audio_base64?: string | null;
+    audio_mime?: string | null;
+  } | null;
+  messages_tail: InterviewMessage[];
+}
+
+export interface InterviewStateResponse {
+  session_id: string;
+  stage: string;
+  can_edit_code: boolean;
+  task_unlocked: boolean;
+  interview_ended: boolean;
+  early_termination: boolean;
+  messages_tail: InterviewMessage[];
+  code_current: string;
+  code_language: string;
+}
+
+/**
+ * Start the interview (get initial greeting from AI)
+ */
+export async function startInterview(sessionId: string): Promise<InterviewResponse> {
+  return await fetchApi<InterviewResponse>(`/interview/${sessionId}/start`, {
+    method: "POST",
+  });
+}
+
+/**
+ * Send a message to the interview AI
+ */
+export async function sendInterviewMessage(
+  sessionId: string,
+  text: string
+): Promise<InterviewResponse> {
+  return await fetchApi<InterviewResponse>(`/interview/${sessionId}/message`, {
+    method: "POST",
+    body: JSON.stringify({ text }),
+  });
+}
+
+/**
+ * Update code in the interview
+ */
+export async function postInterviewCode(
+  sessionId: string,
+  code: string,
+  language: string = "python"
+): Promise<{ ok: boolean }> {
+  return await fetchApi<{ ok: boolean }>(`/interview/${sessionId}/code`, {
+    method: "POST",
+    body: JSON.stringify({ code, language }),
+  });
+}
+
+/**
+ * Report idle time to potentially trigger AI nudge
+ */
+export async function postInterviewIdle(
+  sessionId: string,
+  secondsIdle: number
+): Promise<InterviewResponse> {
+  return await fetchApi<InterviewResponse>(`/interview/${sessionId}/idle`, {
+    method: "POST",
+    body: JSON.stringify({ seconds_idle: secondsIdle }),
+  });
+}
+
+/**
+ * Get current interview state
+ */
+export async function getInterviewState(sessionId: string): Promise<InterviewStateResponse> {
+  return await fetchApi<InterviewStateResponse>(`/interview/${sessionId}/state`);
+}
+
+export interface AudioUploadResponse {
+  session_id: string;
+  transcript: string;
+  assistant?: {
+    text: string;
+    audio_base64?: string | null;
+    audio_mime?: string | null;
+  } | null;
+  stage: string;
+  can_edit_code: boolean;
+  task_unlocked: boolean;
+  interview_ended: boolean;
+  early_termination: boolean;
+  messages_tail: InterviewMessage[];
+}
+
+/**
+ * Upload audio file for transcription and get AI response.
+ * Uses ElevenLabs STT to transcribe, then returns AI response.
+ */
+export async function uploadInterviewAudio(
+  sessionId: string,
+  audioBlob: Blob
+): Promise<AudioUploadResponse> {
+  const formData = new FormData();
+  formData.append("file", audioBlob, "speech.webm");
+
+  const url = `${API_BASE_URL}/interview/${sessionId}/audio`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    body: formData,
+    // Do NOT set Content-Type header - browser will set it with boundary for multipart
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      errorData.detail || `HTTP error! status: ${response.status}`
+    );
+  }
+
+  return response.json();
+}

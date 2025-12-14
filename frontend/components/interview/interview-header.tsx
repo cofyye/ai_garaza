@@ -1,12 +1,13 @@
 import React from "react";
-import { Cpu, Settings, ListTodo } from "lucide-react";
+import { Cpu, Settings, ListTodo, Lock } from "lucide-react";
 import { Button } from "../common/ui-primitives";
 
 interface InterviewHeaderProps {
   onToggleTask?: () => void;
+  taskLocked?: boolean;
 }
 
-export const InterviewHeader = ({ onToggleTask }: InterviewHeaderProps) => {
+export const InterviewHeader = ({ onToggleTask, taskLocked = false }: InterviewHeaderProps) => {
   return (
     <header className="h-20 bg-gray-100 flex items-center justify-between px-6 shrink-0 z-10">
       <div className="flex items-center">
@@ -20,9 +21,11 @@ export const InterviewHeader = ({ onToggleTask }: InterviewHeaderProps) => {
           size="sm" 
           className="gap-2"
           onClick={onToggleTask}
+          disabled={taskLocked}
+          title={taskLocked ? "Complete intro questions first" : "View your coding task"}
         >
-          <ListTodo className="h-4 w-4" />
-          <span>Get your task</span>
+          {taskLocked ? <Lock className="h-4 w-4" /> : <ListTodo className="h-4 w-4" />}
+          <span>{taskLocked ? "Task Locked" : "Get your task"}</span>
         </Button>
         <Button variant="ghost" size="icon" className="h-8 w-8">
           <Settings className="h-4 w-4 text-gray-500" />

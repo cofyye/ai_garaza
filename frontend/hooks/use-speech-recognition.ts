@@ -1,6 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 
-export const useSpeechRecognition = () => {
+export interface UseSpeechRecognitionProps {
+  onFinalTranscript?: (text: string) => void;
+  onSpeechStart?: () => void;
+}
+
+export const useSpeechRecognition = (props?: UseSpeechRecognitionProps) => {
+  const { onFinalTranscript, onSpeechStart } = props || {};
   const [transcript, setTranscript] = useState<string>(
     "Click the microphone to start speaking..."
   );
@@ -45,10 +51,21 @@ export const useSpeechRecognition = () => {
         }
       }
 
+      // Call onSpeechStart when we get any transcript (for barge-in)
+      if ((interimTranscript || finalTranscript) && onSpeechStart) {
+        onSpeechStart();
+      }
+
       const currentText = finalTranscript || interimTranscript;
       if (currentText) {
         console.log("📝 Transcript:", currentText);
         setTranscript(currentText);
+      }
+
+      // Call onFinalTranscript only for final results
+      if (finalTranscript && onFinalTranscript) {
+        console.log("✅ Final transcript:", finalTranscript);
+        onFinalTranscript(finalTranscript.trim());
       }
     };
 

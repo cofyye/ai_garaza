@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str | None = None
     GOOGLE_API_KEY: str | None = None
     ELEVENLABS_API_KEY: str | None = None
+    ELEVENLABS_VOICE_ID: str | None = None
+    ELEVENLABS_MODEL_ID: str = "eleven_turbo_v2"
+    ELEVENLABS_STT_MODEL: str = "scribe_v1"
     
     # CORS / Frontend Config
     FRONTEND_URL: str = "http://localhost:3000"
