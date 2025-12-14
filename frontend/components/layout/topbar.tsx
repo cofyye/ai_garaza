@@ -15,33 +15,21 @@ export const Topbar = () => {
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1 bg-white rounded-full p-1.5 shadow-sm">
-          <button className="relative rounded-full p-2 text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-colors">
-            <Bell className="h-5 w-5" />
-            <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
-          </button>
-          <button className="rounded-full p-2 text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-colors">
-            <MessageSquare className="h-5 w-5" />
-          </button>
-        </div>
+      <div className="flex items-center gap-4 bg-white rounded-full px-6 shadow-sm">
+        <button className="relative rounded-full p-2 text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+          <Bell className="h-5 w-5" />
+          <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+        </button>
 
-        <div className="flex items-center gap-3 bg-white rounded-full pl-1.5 pr-4 py-1.5 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors">
-          <div className="h-9 w-9 rounded-full bg-black flex items-center justify-center text-white">
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-5 w-5"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12s4.477 10 10 10 10-4.477 10-10zm-8-4a2 2 0 10-4 0 2 2 0 004 0z" />
-              <path d="M12 14a4 4 0 00-4 4h8a4 4 0 00-4-4z" />
-            </svg>
-          </div>
-          <div className="flex flex-col justify-center">
-            <span className="text-sm font-bold text-gray-900">OpenAI</span>
-          </div>
-        </div>
+        <button className="rounded-full p-2 text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+          <MessageSquare className="h-5 w-5" />
+        </button>
+
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/OpenAI_Logo.svg/1280px-OpenAI_Logo.svg.png"
+          alt="OpenAI"
+          className="h-16 w-20 rounded-full object-contain p-1 mr-1"
+        />
       </div>
     </header>
   );

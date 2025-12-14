@@ -29,17 +29,25 @@ export const JobsTable = ({ jobs, onSelectJob }: JobsTableProps) => {
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
-      <table className="w-full text-left text-sm">
+      <table className="w-full text-left text-sm table-fixed">
         <thead className="bg-gray-50 border-b border-gray-100">
           <tr>
-            <th className="px-6 py-4 font-medium text-gray-500">Job Title</th>
-            <th className="px-6 py-4 font-medium text-gray-500">Status</th>
-            <th className="px-6 py-4 font-medium text-gray-500">Location</th>
-            <th className="px-6 py-4 font-medium text-gray-500">
+            <th className="px-6 py-4 font-medium text-gray-500 w-[30%]">
+              Job Title
+            </th>
+            <th className="px-6 py-4 font-medium text-gray-500 w-[15%]">
+              Status
+            </th>
+            <th className="px-6 py-4 font-medium text-gray-500 w-[20%]">
+              Location
+            </th>
+            <th className="px-6 py-4 font-medium text-gray-500 w-[15%]">
               Applications
             </th>
-            <th className="px-6 py-4 font-medium text-gray-500">Posted</th>
-            <th className="px-6 py-4 font-medium text-gray-500 w-10"></th>
+            <th className="px-6 py-4 font-medium text-gray-500 w-[15%]">
+              Posted
+            </th>
+            <th className="px-6 py-4 font-medium text-gray-500 w-[5%]"></th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
