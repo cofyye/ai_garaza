@@ -55,6 +55,7 @@ async def seed_database():
     jobs_data = [
         {
             "title": "Junior Python Backend Developer",
+            "company": "TechCorp Solutions",
             "location": "Belgrade, Serbia",
             "location_type": "hybrid",
             "job_type": "full-time",
@@ -149,6 +150,7 @@ async def seed_database():
         },
         {
             "title": "DevOps Engineer",
+            "company": "CloudScale Systems",
             "location": "Novi Sad, Serbia",
             "location_type": "hybrid",
             "job_type": "full-time",
@@ -196,6 +198,7 @@ async def seed_database():
         },
         {
             "title": "Full Stack Engineer (Node.js + React)",
+            "company": "OpenAI",
             "location": "Remote",
             "location_type": "remote",
             "job_type": "full-time",
@@ -243,6 +246,7 @@ async def seed_database():
         },
         {
             "title": "QA Automation Engineer",
+            "company": "QualityFirst Ltd",
             "location": "Belgrade, Serbia",
             "location_type": "onsite",
             "job_type": "full-time",
@@ -360,7 +364,7 @@ async def seed_database():
             "updated_at": datetime.utcnow() - timedelta(days=4)
         },
         {
-            "email": "nikola.djordjevic@gmail.com",
+            "email": "aleks.ilic05@gmail.com",
             "full_name": "Nikola Đorđević",
             "phone": "+381602345678",
             "location": "Belgrade, Serbia",

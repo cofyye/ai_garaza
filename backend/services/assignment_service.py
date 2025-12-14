@@ -262,34 +262,32 @@ class AssignmentService:
             }
         )
         
-        # MOCK EMAIL - Print to console
-        print("\n" + "="*80)
-        print("📧 MOCK EMAIL NOTIFICATION")
-        print("="*80)
-        print(f"To: {user.get('email')}")
-        print(f"Subject: Technical Assignment - {job.get('title')} at {job.get('company')}")
-        print(f"\nDear {user.get('full_name', 'Candidate')},\n")
-        print(f"Congratulations! We'd like to move forward with your application for {job.get('title')}.")
-        print(f"\n📝 Assignment: {assignment.get('task_title')}")
-        print(f"⏰ Time Limit: {time_limit} hours")
-        print(f"📅 Deadline: {deadline.strftime('%Y-%m-%d %H:%M UTC')}")
-        print(f"\n{assignment.get('task_description')}")
-        print(f"\n✅ Requirements:")
-        for req in assignment.get('task_requirements', []):
-            print(f"   - {req}")
-        print(f"\n🔍 Evaluation Criteria:")
-        for criteria in assignment.get('evaluation_criteria', []):
-            print(f"   - {criteria}")
-        if assignment.get('additional_resources'):
-            print(f"\n📚 Resources: {assignment.get('additional_resources')}")
+        # Send assignment email to candidate
+        from services.email_service import email_service
         
         # Use session_url if available, otherwise fall back to assignment ID
         interview_link = assignment.get('session_url', f"http://localhost:3000/#/interview/{assignment.get('session_id', assignment_id)}")
-        print(f"\n🔗 Interview Link: {interview_link}")
-        print(f"\nGood luck!")
-        print(f"\nBest regards,")
-        print(f"Engval.ai Team")
-        print("="*80 + "\n")
+        
+        email_sent = email_service.send_assignment_email(
+            to_email=user.get('email'),
+            candidate_name=user.get('full_name', 'Candidate'),
+            job_title=job.get('title'),
+            company=job.get('company', 'Company'),
+            task_title=assignment.get('task_title'),
+            task_description=assignment.get('task_description'),
+            time_limit=time_limit,
+            deadline=deadline.strftime('%Y-%m-%d %H:%M UTC'),
+            requirements=assignment.get('task_requirements', []),
+            evaluation_criteria=assignment.get('evaluation_criteria', []),
+            interview_link=interview_link,
+            additional_resources=assignment.get('additional_resources')
+        )
+        
+        if not email_sent:
+            # Log warning but don't fail the operation
+            print(f"⚠️  Warning: Failed to send email to {user.get('email')}")
+        else:
+            print(f"✅ Assignment email sent successfully to {user.get('email')}")
         
         return True
     

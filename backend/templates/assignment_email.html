@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Technical Assignment</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        'Helvetica Neue', Arial, sans-serif;
+      background-color: #f8f9fa;
+    "
+  >
+    <table
+      role="presentation"
+      style="
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #f8f9fa;
+        padding: 60px 20px;
+      "
+    >
+      <tr>
+        <td align="center">
+          <!-- Main Container -->
+          <table
+            role="presentation"
+            style="
+              width: 100%;
+              max-width: 560px;
+              border-collapse: collapse;
+              background-color: #ffffff;
+              border-radius: 16px;
+              overflow: hidden;
+              border: 1px solid #e5e7eb;
+            "
+          >
+            <!-- Content -->
+            <tr>
+              <td style="padding: 56px 48px">
+                <!-- Greeting -->
+                <p
+                  style="
+                    margin: 0 0 24px 0;
+                    font-size: 18px;
+                    color: #111827;
+                    line-height: 1.6;
+                  "
+                >
+                  Hi <strong>{{candidate_name}}</strong>,
+                </p>
+
+                <p
+                  style="
+                    margin: 0 0 20px 0;
+                    font-size: 16px;
+                    color: #374151;
+                    line-height: 1.7;
+                  "
+                >
+                  Thanks for your interest in joining {{company}}. We'd love to
+                  learn more about how you approach technical challenges.
+                </p>
+
+                <p
+                  style="
+                    margin: 0 0 32px 0;
+                    font-size: 16px;
+                    color: #374151;
+                    line-height: 1.7;
+                  "
+                >
+                  We've prepared a short technical assignment that will help us
+                  understand your skills and give you a sense of the kind of
+                  work we do. It should take about an hour to complete.
+                </p>
+
+                <!-- CTA Button -->
+                <table
+                  role="presentation"
+                  style="
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 40px 0 24px 0;
+                  "
+                >
+                  <tr>
+                    <td align="center">
+                      <a
+                        href="{{interview_link}}"
+                        style="
+                          display: inline-block;
+                          padding: 16px 48px;
+                          background-color: #111827;
+                          color: #ffffff;
+                          text-decoration: none;
+                          border-radius: 12px;
+                          font-size: 16px;
+                          font-weight: 600;
+                          transition: background-color 0.2s;
+                        "
+                        >Start Assignment</a
+                      >
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Link Alternative -->
+                <p
+                  style="
+                    margin: 0;
+                    font-size: 14px;
+                    color: #9ca3af;
+                    text-align: center;
+                    line-height: 1.5;
+                  "
+                >
+                  <a
+                    href="{{interview_link}}"
+                    style="
+                      color: #6b7280;
+                      text-decoration: underline;
+                      word-break: break-all;
+                    "
+                    >{{interview_link}}</a
+                  >
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td style="padding: 40px 48px 48px 48px; text-align: center">
+                <p
+                  style="
+                    margin: 0 0 8px 0;
+                    font-size: 14px;
+                    color: #9ca3af;
+                    line-height: 1.5;
+                  "
+                >
+                  Engval.ai
+                </p>
+                <p style="margin: 0; font-size: 13px; color: #d1d5db">© 2025</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
