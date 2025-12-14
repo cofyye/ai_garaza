@@ -56,26 +56,8 @@ class InterviewStateResponse(BaseModel):
 
 
 interview_graph = InterviewGraph()
-
-# Lazy initialization for TTS and STT services
-_tts_service = None
-_stt_service = None
-
-def get_tts_service():
-    """Get or create the TTS service lazily."""
-    global _tts_service
-    if _tts_service is None:
-        from agents.services.tts_service import TTSService
-        _tts_service = TTSService()
-    return _tts_service
-
-def get_stt_service():
-    """Get or create the STT service lazily."""
-    global _stt_service
-    if _stt_service is None:
-        from agents.services.stt_service import STTService
-        _stt_service = STTService()
-    return _stt_service
+tts_service = TTSService()
+stt_service = STTService()
 
 
 def format_messages_tail(messages: list, limit: int = 20) -> list[dict]:
@@ -96,7 +78,6 @@ async def generate_tts_safe(text: str) -> Optional[dict]:
     if not text:
         return None
     try:
-        tts_service = get_tts_service()
         return await tts_service.text_to_speech(text)
     except Exception as e:
         logger.warning(f"TTS failed, continuing without audio: {str(e)}")
@@ -158,14 +139,26 @@ async def get_interview_session(session_id: str, db):
             "messages": [],
             "code": {"language": "python", "current": "", "last_change_at": None},
             "code_history": [],
-            "counters": {
-                "intro_questions_asked": 0,
+
+        # Lazy initialization for TTS and STT services
+        _tts_service = None
+        _stt_service = None
                 "screening_questions_asked": 0,
                 "screening_target": 6,
                 "poor_answers_count": 0,
+            global _tts_service
+            if _tts_service is None:
+                from agents.services.tts_service import TTSService
+                _tts_service = TTSService()
+            return _tts_service
                 "idle_nudges": 0,
                 "last_idle_nudge_at": None
             },
+            global _stt_service
+            if _stt_service is None:
+                from agents.services.stt_service import STTService
+                _stt_service = STTService()
+            return _stt_service
             "candidate_context": candidate_context,
             "job_context": job_context,
             "task_context": {
@@ -439,7 +432,6 @@ async def upload_audio(session_id: str, file: UploadFile = File(...), db=Depends
             raise HTTPException(status_code=400, detail="Empty audio file")
         
         try:
-            stt_service = get_stt_service()
             transcript_result = await stt_service.transcribe(
                 file_bytes=file_bytes,
                 filename=file.filename or "audio.webm",

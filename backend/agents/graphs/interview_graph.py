@@ -12,8 +12,15 @@ logger = logging.getLogger(__name__)
 class InterviewGraph:
     
     def __init__(self):
-        self.llm_service = LLMService()
+        self._llm_service = None
         self.graph = self._build_graph()
+    
+    @property
+    def llm_service(self):
+        """Get or create the LLM service lazily."""
+        if self._llm_service is None:
+            self._llm_service = LLMService()
+        return self._llm_service
     
     def _build_graph(self) -> StateGraph:
         workflow = StateGraph(InterviewState)

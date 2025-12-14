@@ -526,3 +526,80 @@ export async function uploadInterviewAudio(
 
   return response.json();
 }
+
+// ============ Analytics API ============
+
+export interface NotableMoment {
+  time: string;
+  description: string;
+  type: "positive" | "negative";
+}
+
+export interface CandidateAnalysis {
+  id: string;
+  name: string;
+  position: string;
+  interviewDate: string;
+  duration: number;
+  technicalScore: number;
+  communicationScore: number;
+  overallScore: number;
+  verdict: "STRONG_HIRE" | "HIRE" | "MAYBE" | "NO_HIRE";
+  keyStrengths: string[];
+  keyInsights: string;
+  notableMoments: NotableMoment[];
+}
+
+export interface AnalyticsResponse {
+  candidates: CandidateAnalysis[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface GetAnalyticsParams {
+  page?: number;
+  pageSize?: number;
+  verdict?: string;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+}
+
+/**
+ * Get interview analysis results for analytics page
+ */
+export async function getAnalytics(params?: GetAnalyticsParams): Promise<AnalyticsResponse> {
+  const searchParams = new URLSearchParams();
+
+  if (params?.page) searchParams.set("page", String(params.page));
+  if (params?.pageSize) searchParams.set("page_size", String(params.pageSize));
+  if (params?.verdict) searchParams.set("verdict", params.verdict);
+  if (params?.search) searchParams.set("search", params.search);
+  if (params?.sortBy) searchParams.set("sort_by", params.sortBy);
+  if (params?.sortOrder) searchParams.set("sort_order", params.sortOrder);
+
+  const query = searchParams.toString();
+  const endpoint = query ? `/analytics?${query}` : "/analytics";
+
+  return await fetchApi<AnalyticsResponse>(endpoint);
+}
+
+/**
+ * Get detailed analysis for a specific interview
+ */
+export async function getAnalysisDetail(analysisId: string): Promise<any> {
+  return await fetchApi<any>(`/analytics/${analysisId}`);
+}
+
+/**
+ * Get analytics summary statistics
+ */
+export async function getAnalyticsSummary(): Promise<{
+  total: number;
+  byVerdict: Record<string, { count: number; avgTechnical: number; avgCommunication: number; avgOverall: number }>;
+  averages: { avgTechnical: number; avgCommunication: number; avgOverall: number; avgDuration: number };
+}> {
+  return await fetchApi<any>("/analytics/stats/summary");
+}
+
